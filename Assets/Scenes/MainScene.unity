@@ -2659,7 +2659,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_Sprite: {fileID: 0}
-  m_Type: 0
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -3301,6 +3301,7 @@ MonoBehaviour:
   Preview: {fileID: 431142794}
   PreviewAspectRatioFitter: {fileID: 431142793}
   KernelOutline: {fileID: 1692697719}
+  AutomaticButton: {fileID: 1631951082}
 --- !u!1 &1201887069
 GameObject:
   m_ObjectHideFlags: 0
@@ -5002,6 +5003,7 @@ GameObject:
   - component: {fileID: 1631951081}
   - component: {fileID: 1631951080}
   - component: {fileID: 1631951079}
+  - component: {fileID: 1631951082}
   m_Layer: 5
   m_Name: Auto
   m_TagString: Untagged
@@ -5072,7 +5074,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 910387457}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1631951082}
+        m_TargetAssemblyTypeName: AutomaticButton, Assembly-CSharp
+        m_MethodName: Toggle
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1631951080
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5111,6 +5125,51 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1631951077}
   m_CullTransparentMesh: 1
+--- !u!114 &1631951082
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1631951077}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e22eec07794e168408f41b075b9dc178, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  AutomaticDelay: 0.5
+  Button: {fileID: 1631951079}
+  OnClick:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1191789395}
+        m_TargetAssemblyTypeName: ElementCounter, Assembly-CSharp
+        m_MethodName: CountNext
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  DisabledColors:
+    m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
+    m_HighlightedColor: {r: 0.47058827, g: 0.95294124, b: 0.4431373, a: 1}
+    m_PressedColor: {r: 0.7843138, g: 0.7843138, b: 0.7843138, a: 1}
+    m_SelectedColor: {r: 0.9607844, g: 0.9607844, b: 0.9607844, a: 1}
+    m_DisabledColor: {r: 0.7843138, g: 0.7843138, b: 0.7843138, a: 0.5019608}
+    m_ColorMultiplier: 0
+    m_FadeDuration: 0.1
+  EnabledColors:
+    m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
+    m_HighlightedColor: {r: 0.9529412, g: 0.4431373, b: 0.4431373, a: 1}
+    m_PressedColor: {r: 0.7843138, g: 0.7843138, b: 0.7843138, a: 1}
+    m_SelectedColor: {r: 0.9607844, g: 0.9607844, b: 0.9607844, a: 1}
+    m_DisabledColor: {r: 0.7843138, g: 0.7843138, b: 0.7843138, a: 0.5019608}
+    m_ColorMultiplier: 0
+    m_FadeDuration: 0.1
 --- !u!1 &1666908807
 GameObject:
   m_ObjectHideFlags: 0
