@@ -4,8 +4,7 @@ using UnityEngine.UI;
 
 public class Counter : MonoBehaviour
 {
-    [SerializeField] private AspectRatioFitter AspectRatioFitter;
-    [SerializeField] private RawImage RawImage;
+    public RawImage RawImage;
     public TMP_Text Text;
     public int Count;
     
@@ -14,12 +13,12 @@ public class Counter : MonoBehaviour
         Count = count;
         Text.text = Count.ToString();
         RawImage.texture = texture;
-        AspectRatioFitter.aspectRatio = (float) texture.width / texture.height;
+        RawImage.FitInParent();
     }
 
-    public void Increment()
+    public void Increment(int amount = 1)
     {
-        Count++;
+        Count += amount;
         Text.text = Count.ToString();
     }
 }

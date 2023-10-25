@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -10,14 +9,14 @@ public class ElementCounter : MonoBehaviour
 	[SerializeField] private RectTransform CounterParent;
 
 	[SerializeField] private RawImage Preview;
-	[SerializeField] private AspectRatioFitter PreviewAspectRatioFitter;
 	[SerializeField] private RawImage KernelOutline;
 	[SerializeField] private AutomaticButton AutomaticButton;
-
-
+	[SerializeField] private Button NextStepButton;
+	[SerializeField] private Button ManualButton;
+	[SerializeField] private ElementRotator ElementRotator;
+	
 	private Dictionary<ElementWrapper, Counter> Counts = new();
-
-
+	
 	private Texture2D OrigTexture;
 	private Texture2D KernelOutlineTexture;
 	private int X;
@@ -30,20 +29,24 @@ public class ElementCounter : MonoBehaviour
 		X = 1;
 		Y = OrigTexture.height - Mathf.CeilToInt(setup.KernelSize / 2f);
 		kernelSize = setup.KernelSize;
-		Counts.Clear();
-
-		foreach (var counter in CounterParent.GetComponentsInChildren<Counter>())
-		{
-			Destroy(counter.gameObject);
-		}
+		
+		Clear();
 
 		Preview.texture = OrigTexture;
-		PreviewAspectRatioFitter.aspectRatio = (float)OrigTexture.width / OrigTexture.height;
+		Preview.FitInParent();
 
-		AutomaticButton.AutomaticDelay = 10f / ((OrigTexture.width - 2) * (OrigTexture.height - 2));
+		AutomaticButton.AutomaticDelay = 2f / ((OrigTexture.width - 2) * (OrigTexture.height - 2));
 
 		LayoutRebuilder.ForceRebuildLayoutImmediate(Preview.rectTransform.parent as RectTransform);
 		RefreshKernelOutline();
+	}
+
+	public void Clear()
+	{
+		Counts.Clear();
+		CounterParent.DestroyChildren<Counter>(x => x.RawImage.texture.DestroyIfNull());
+		//false to prevent destroying preset textures
+		Preview.texture.DestroyIfNull(false);
 	}
 
 	private void RefreshKernelOutline()
@@ -51,10 +54,16 @@ public class ElementCounter : MonoBehaviour
 		if (CanCount())
 		{
 			KernelOutline.rectTransform.localScale = Vector3.one;
+			NextStepButton.interactable = false;
+			AutomaticButton.Button.interactable = true;
+			ManualButton.interactable = true;
 		}
 		else
 		{
 			KernelOutline.rectTransform.localScale = Vector3.zero;
+			NextStepButton.interactable = true;
+			AutomaticButton.Button.interactable = false;
+			ManualButton.interactable = false;
 		}
 		
 		if (KernelOutlineTexture != null && (KernelOutlineTexture.width != kernelSize + 2 ||
@@ -66,9 +75,7 @@ public class ElementCounter : MonoBehaviour
 
 		if (KernelOutlineTexture == null)
 		{
-			KernelOutlineTexture = new Texture2D(kernelSize + 2, kernelSize + 2, TextureFormat.RGBA32, false);
-			KernelOutlineTexture.filterMode = FilterMode.Point;
-			KernelOutlineTexture.wrapMode = TextureWrapMode.Clamp;
+			KernelOutlineTexture = Texture2DExtensions.CreatePixelTexture(kernelSize + 2, kernelSize + 2, TextureFormat.RGBA32); 
 			for (int x = 0; x < kernelSize + 2; x++)
 			for (int y = 0; y < kernelSize + 2; y++)
 			{
@@ -112,9 +119,7 @@ public class ElementCounter : MonoBehaviour
 	{
 		if (!CanCount()) return;
 
-		Texture2D textureElement = new Texture2D(kernelSize, kernelSize, TextureFormat.RGB24, false);
-		textureElement.filterMode = FilterMode.Point;
-		textureElement.wrapMode = TextureWrapMode.Clamp;
+		Texture2D textureElement = Texture2DExtensions.CreatePixelTexture(kernelSize, kernelSize);
 		textureElement.SetPixels(OrigTexture.GetPixels(X - Mathf.FloorToInt(kernelSize / 2f),
 			Y - Mathf.FloorToInt(kernelSize / 2f), kernelSize, kernelSize));
 		textureElement.Apply();
@@ -124,22 +129,17 @@ public class ElementCounter : MonoBehaviour
 		if (Counts.ContainsKey(elementWrapper))
 		{
 			Counts[elementWrapper].Increment();
-			DestroyImmediate(textureElement,
-				true); //we can destroy this instance, we dont need to waste momory on duplicates
+			//we can destroy this instance, we dont need to waste momory on duplicates
+			DestroyImmediate(textureElement, true);
 		}
 		else
 		{
-			var go = Instantiate(CounterPrefab, CounterParent);
-			var counter = go.GetComponent<Counter>();
+			var counter = Instantiate(CounterPrefab, CounterParent).GetComponent<Counter>();;
 			counter.Set(textureElement, 1);
 			Counts.Add(elementWrapper, counter);
 		}
 
-		var sorted = Counts.OrderByDescending(x => x.Value.Count).ToList();
-		foreach (var keyValuePair in sorted)
-		{
-			keyValuePair.Value.transform.SetAsLastSibling();
-		}
+		Counts.Values.SortInHierarchy();
 
 		if (NeedsToGoToNextRow())
 		{
@@ -150,8 +150,16 @@ public class ElementCounter : MonoBehaviour
 		{
 			X++;
 		}
-
-
+		
 		RefreshKernelOutline();
 	}
+
+	public void MoveDataToRotator()
+	{
+		ElementRotator.Setup(Counts.Select(x => (x.Key, x.Value.Count)).ToList());
+		CounterParent.DestroyChildren<Counter>(x => x.RawImage.texture = null);
+		Clear();
+	}
+	
+	
 }

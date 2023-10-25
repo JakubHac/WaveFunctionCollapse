@@ -9,16 +9,15 @@ public class AutomaticButton : MonoBehaviour
     private bool AutomaticEnabled = false;
     public float AutomaticDelay = 0.5f;
 
-    [SerializeField] private Button Button;
+    public Button Button;
     [SerializeField] private UnityEvent OnClick;
     [Header("Disabled Colors")]
     [SerializeField] private ColorBlock DisabledColors;
     [Header("Enabled Colors")]
     [SerializeField] private ColorBlock EnabledColors;
     
-    private IEnumerator Start()
+    private void Start()
     {
-        yield return new WaitForEndOfFrame();
         Disable();
     }
 
@@ -39,10 +38,9 @@ public class AutomaticButton : MonoBehaviour
         }
     }
 
-    private void Enable()
+    public void Enable()
     {
         //Button.SetColors(EnabledColors);
-        //LayoutRebuilder.ForceRebuildLayoutImmediate(Button.transform.parent as RectTransform);
         AutomaticRoutine ??= StartCoroutine(AutomaticClick());
         AutomaticEnabled = true;
     }
@@ -61,10 +59,9 @@ public class AutomaticButton : MonoBehaviour
         }
     }
 
-    private void Disable()
+    public void Disable()
     {
         //Button.SetColors(DisabledColors);
-        //LayoutRebuilder.ForceRebuildLayoutImmediate(Button.transform.parent as RectTransform);
         if (AutomaticRoutine != null)
         {
             StopCoroutine(AutomaticRoutine);

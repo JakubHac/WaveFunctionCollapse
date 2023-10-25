@@ -1,8 +1,12 @@
 using UnityEngine;
+using UnityEngine.Events;
 
 public class UIView : MonoBehaviour
 {
     [SerializeField] private bool ShowOnStartup = false;
+    [SerializeField] private UnityEvent OnShow;
+    [SerializeField] private UnityEvent OnHide;
+    
 
     private RectTransform _rectTransform;
     private RectTransform RectTransform
@@ -31,6 +35,7 @@ public class UIView : MonoBehaviour
 
     public void Hide()
     {
+        OnHide?.Invoke();
         gameObject.SetActive(false);
     }
 
@@ -46,6 +51,7 @@ public class UIView : MonoBehaviour
     public void Show()
     {
         CenterOnScreen();
+        OnShow?.Invoke();
         gameObject.SetActive(true);
     }
 }

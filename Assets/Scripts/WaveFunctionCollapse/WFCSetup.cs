@@ -7,5 +7,4 @@ public class WFCSetup
     public int OutputHeight = 64;
     public bool Ground = true;
     public Texture2D InputTexture;
-    
 }
