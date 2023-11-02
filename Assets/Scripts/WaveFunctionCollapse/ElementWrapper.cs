@@ -4,11 +4,13 @@ using UnityEngine;
 
 public class ElementWrapper : IEquatable<ElementWrapper>
 {
-    public Texture2D Texture;
+    public readonly Texture2D Texture;
+    public readonly Color MiddleColor;
 
     public ElementWrapper(Texture2D texture)
     {
         Texture = texture;
+        MiddleColor = texture.GetPixel(texture.width / 2, texture.height / 2);
     }
 
     public bool Equals(ElementWrapper other)
@@ -52,5 +54,10 @@ public class ElementWrapper : IEquatable<ElementWrapper>
         }
 
         return hashCode.ToHashCode();
+    }
+
+    public Color GetPixelFromCenter(Vector2Int neighborOffset)
+    {
+        return Texture.GetPixel(Texture.width / 2 + neighborOffset.x, Texture.height / 2 + neighborOffset.y);
     }
 }

@@ -152,4 +152,11 @@ public class ElementRotator : MonoBehaviour
         Image180Deg.texture.DestroyIfNull();
         Image270Deg.texture.DestroyIfNull();
     }
+    
+    public void PassDataToWFC()
+    {
+        Dictionary<ElementWrapper, int> elements = Output.ToDictionary(x => x.Key, x => x.Value.Count);
+        FindObjectOfType<WFC>(includeInactive: true).StartAlogrithm(elements);
+        Clear();
+    }
 }
