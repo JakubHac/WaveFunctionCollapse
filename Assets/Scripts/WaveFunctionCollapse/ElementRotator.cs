@@ -125,9 +125,6 @@ public class ElementRotator : MonoBehaviour
         Texture2D texture180 = texture90.Rotate90Deg();
         Texture2D texture270 = texture180.Rotate90Deg();
         
-        Debug.Log($"middle 0 color: {texture.GetPixel(1,1)} format: {texture.format}");
-        Debug.Log($"middle 90 color: {texture90.GetPixel(1,1)} format: {texture90.format}");
-        
         Image0Deg.texture = texture;
         Image90Deg.texture = texture90;
         Image180Deg.texture = texture180;

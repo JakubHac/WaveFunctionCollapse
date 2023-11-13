@@ -7,6 +7,8 @@ public class WFC : MonoBehaviour
 	[SerializeField] private List<UIView> ViewsToCloseOnBegin;
 	[SerializeField] private UIView CountElementsView;
 	[SerializeField] private Material OutputMaterial;
+	[SerializeField] private OutputMeshController MeshController;
+	
 
 	bool PreservedGround = false;
 	public static WFCSetup Setup;
@@ -59,6 +61,7 @@ public class WFC : MonoBehaviour
 	{
 		SetupOutput(elements);
 		RefreshOutputTexture();
+		MeshController.SetupMeshFromTexture();
 	}
 
 	public void NextStep()
@@ -78,6 +81,7 @@ public class WFC : MonoBehaviour
 		operation.Execute();
 		
 		RefreshOutputTexture();
+		MeshController.RefreshFromMaterialTexture();
 	}
 
 	private void CollapseMostCertain()
@@ -94,12 +98,12 @@ public class WFC : MonoBehaviour
 			if (OutputTexture.width != Setup.OutputWidth || OutputTexture.height != Setup.OutputHeight)
 			{
 				DestroyImmediate(OutputTexture, true);
-				OutputTexture = Texture2DExtensions.CreatePixelTexture(Setup.OutputWidth, Setup.OutputHeight);
+				CreateOutputTexture();
 			}
 		}
 		else
 		{
-			OutputTexture = Texture2DExtensions.CreatePixelTexture(Setup.OutputWidth, Setup.OutputHeight);
+			CreateOutputTexture();
 		}
 
 		for (int x = 0; x < Output.GetLength(0); x++)
@@ -113,6 +117,11 @@ public class WFC : MonoBehaviour
 		OutputTexture.Apply();
 
 		OutputMaterial.mainTexture = OutputTexture;
+	}
+
+	private void CreateOutputTexture()
+	{
+		OutputTexture = Texture2DExtensions.CreatePixelTexture(Setup.OutputWidth, Setup.OutputHeight, TextureFormat.RGBA32);
 	}
 
 	private void SetupOutput(Dictionary<ElementWrapper, int> elements)
