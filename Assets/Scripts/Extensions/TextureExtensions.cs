@@ -2,7 +2,7 @@ using UnityEngine;
 
 public static class TextureExtensions
 {
-    public static void DestroyIfNull(this Texture texture, bool allowDestroyingAssets = true)
+    public static void DestroyIfNotNull(this Texture texture, bool allowDestroyingAssets = true)
     {
         if (texture != null)
         {

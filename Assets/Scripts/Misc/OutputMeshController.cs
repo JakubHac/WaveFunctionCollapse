@@ -13,18 +13,24 @@ public class OutputMeshController : MonoBehaviour
 
     private int[,] triangleScheme = new int[12, 3]
     {
-        {1,0,2},
-        {1,2,3},
-        {1,4,0},
-        {1,5,4},
-        {3,5,1},
-        {3,7,5},
-        {2,7,3},
-        {2,6,7},
-        {0,6,2},
-        {0,4,6},
-        {4,7,6},
-        {4,5,7}
+        //bottom
+        {1,2,0},
+        {1,3,2},
+        //sides
+        {1,0,4},
+        {1,4,5},
+        
+        {3,1,5},
+        {3,5,7},
+        
+        {2,3,7},
+        {2,7,6},
+        
+        {0,2,6},
+        {0,6,4},
+        //top
+        {4,6,7},
+        {4,7,5}
     };
     
     
@@ -90,13 +96,13 @@ public class OutputMeshController : MonoBehaviour
         Array array = new float[Filter.mesh.vertexCount];
         for (int i = 0; i < vertexCount; i++)
         {
-            int place = i / 8;
-            if (place < 4)
+            if (i % 8 < 4)
             {
                 array.SetValue(0f, i);
             }
             else
             {
+                int place = Mathf.FloorToInt(i / 8f);
                 int x = place % texture.width;
                 int y = place / texture.width;
                 float value = texture.GetPixel(x,y).a;
@@ -154,7 +160,7 @@ public class OutputMeshController : MonoBehaviour
                 Vector2 UV = new Vector2(x / textureWidthAsFloat, y / textureHeightAsFloat);
                 for (int i = 0; i < 2; i++)
                 {
-                    UVs[vertexIndex + 1] = UV;
+                    UVs[vertexIndex + 0] = UV;
                     UVs[vertexIndex + 1] = UV;
                     UVs[vertexIndex + 2] = UV;
                     UVs[vertexIndex + 3] = UV;

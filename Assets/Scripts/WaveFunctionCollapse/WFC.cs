@@ -66,6 +66,7 @@ public class WFC : MonoBehaviour
 
 	public void NextStep()
 	{
+		Debug.Log("Next step");
 		if (!PreservedGround && Setup.Ground)
 		{
 			PreserveGround();
@@ -86,6 +87,7 @@ public class WFC : MonoBehaviour
 
 	private void CollapseMostCertain()
 	{
+		Debug.Log("Debug most certain");
 		var mostCertain = Output.Cast<OutputPixel>().Where(x => !x.IsCollapsed).OrderBy(x => x.GetUncertainty()).First();
 		
 		Operations.Add(new Collapse(mostCertain.Position));
@@ -93,6 +95,7 @@ public class WFC : MonoBehaviour
 
 	private void RefreshOutputTexture()
 	{
+		Debug.Log("Refresh output texture");
 		if (OutputTexture != null)
 		{
 			if (OutputTexture.width != Setup.OutputWidth || OutputTexture.height != Setup.OutputHeight)
@@ -121,6 +124,7 @@ public class WFC : MonoBehaviour
 
 	private void CreateOutputTexture()
 	{
+		Debug.Log("Create output texture");
 		OutputTexture = Texture2DExtensions.CreatePixelTexture(Setup.OutputWidth, Setup.OutputHeight, TextureFormat.RGBA32);
 	}
 
@@ -150,6 +154,7 @@ public class WFC : MonoBehaviour
 
 	private void PreserveGround()
 	{
+		Debug.Log("Preserve ground");
 		var lastY = Output.GetLength(1) - 1;
 		for (int x = 0; x < Setup.OutputWidth; x++)
 		{

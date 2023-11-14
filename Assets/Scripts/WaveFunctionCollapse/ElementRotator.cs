@@ -33,7 +33,7 @@ public class ElementRotator : MonoBehaviour
     public void Setup(List<(ElementWrapper element, int count)> elements)
     {
         AutomaticButton.Disable();
-        Clear();
+        Clear(true);
         foreach (var element in elements)
         {
             var counter = Instantiate(CounterPrefab, InputParent).GetComponent<Counter>();
@@ -138,22 +138,45 @@ public class ElementRotator : MonoBehaviour
         LayoutRebuilder.ForceRebuildLayoutImmediate(Image0Deg.transform.parent.parent as RectTransform);
     }
 
-    public void Clear()
+    public void Clear(bool destroy)
     {
         Input.Clear();
         Output.Clear();
-        InputParent.DestroyChildren<Counter>(x => x.RawImage.texture.DestroyIfNull());
-        OutputParent.DestroyChildren<Counter>(x => x.RawImage.texture.DestroyIfNull());
-        Image0Deg.texture.DestroyIfNull();
-        Image90Deg.texture.DestroyIfNull();
-        Image180Deg.texture.DestroyIfNull();
-        Image270Deg.texture.DestroyIfNull();
+        InputParent.DestroyChildren<Counter>(x =>
+        {
+            if (destroy)
+            {
+                x.RawImage.texture.DestroyIfNotNull();
+            }
+        });
+        OutputParent.DestroyChildren<Counter>(x =>
+        {
+            if (destroy)
+            {
+                x.RawImage.texture.DestroyIfNotNull();
+            }
+            
+        });
+        if (destroy)
+        {
+            Image0Deg.texture.DestroyIfNotNull();
+            Image90Deg.texture.DestroyIfNotNull();
+            Image180Deg.texture.DestroyIfNotNull();
+            Image270Deg.texture.DestroyIfNotNull();
+        }
+        else
+        {
+            Image0Deg.texture = null;
+            Image90Deg.texture = null;
+            Image180Deg.texture = null;
+            Image270Deg.texture = null;
+        }
     }
     
     public void PassDataToWFC()
     {
         Dictionary<ElementWrapper, int> elements = Output.ToDictionary(x => x.Key, x => x.Value.Count);
         FindObjectOfType<WFC>(includeInactive: true).StartAlogrithm(elements);
-        Clear();
+        Clear(false);
     }
 }

@@ -44,9 +44,9 @@ public class ElementCounter : MonoBehaviour
 	public void Clear()
 	{
 		Counts.Clear();
-		CounterParent.DestroyChildren<Counter>(x => x.RawImage.texture.DestroyIfNull());
+		CounterParent.DestroyChildren<Counter>(x => x.RawImage.texture.DestroyIfNotNull());
 		//false to prevent destroying preset textures
-		Preview.texture.DestroyIfNull(false);
+		Preview.texture.DestroyIfNotNull(false);
 	}
 
 	private void RefreshKernelOutline()

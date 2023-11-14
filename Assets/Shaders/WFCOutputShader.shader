@@ -45,7 +45,7 @@ Shader "Custom/WFCOutputShader"
         void vert(inout vertex_input v, out Input o)
         {
             #ifdef SHADER_API_D3D11
-                v.vertex.y = v.vertex.y * HeightMap[v.id];
+                v.vertex.y = v.vertex.y + HeightMap[v.id];
             #endif
             UNITY_INITIALIZE_OUTPUT(Input, o);
         }
