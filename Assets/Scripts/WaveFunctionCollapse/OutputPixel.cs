@@ -120,15 +120,17 @@ public class OutputPixel
         {
             return false;
         }
-        
-        var possibleColorsBefore = PossibleElements.Select(x => x.MiddleColor).Distinct().ToArray();
-        Refresh();
-        var possibleColorsAfter = PossibleElements.Select(x => x.MiddleColor).Distinct().ToArray();
 
-        if (possibleColorsAfter.Length == 0)
+        var possibleColorsBefore = PossibleElements.Select(x => x.MiddleColor).Distinct().Count();
+        Refresh();
+        
+        if (PossibleElements.Length == 0)
         {
             Debug.LogError($"No possible colors after refresh! {Position}");
+            return possibleColorsBefore != 0;
         }
+        
+        var possibleColorsAfter = PossibleElements.Select(x => x.MiddleColor).Distinct().ToArray();
 
         if (possibleColorsAfter.Length == 1)
         {
@@ -136,13 +138,13 @@ public class OutputPixel
             return true;
         }
 
-        return possibleColorsBefore.Length != possibleColorsAfter.Length;
+        return possibleColorsBefore != possibleColorsAfter.Length;
     }
 
     private void Refresh()
     {
         var neighbors =  WFC.GetNeighbors(Position);
-        List<ElementWrapper> toBeRemoved = new List<ElementWrapper>();
+        List<ElementWrapper> toBeAssigned = new List<ElementWrapper>(PossibleElements.Length);
 
         foreach (ElementWrapper element in PossibleElements)
         {
@@ -152,23 +154,22 @@ public class OutputPixel
                 var testPixel = element.GetPixelFromCenter(neighborOffset);
                 if (neighbor.IsCollapsed)
                 {
-                    if (!neighbor.Color.Equals(testPixel))
+                    if (neighbor.Color.Equals(testPixel))
                     {
-                        toBeRemoved.Add(element);
+                        toBeAssigned.Add(element);
                         break;
                     }
                 }
-                //var neighborPossibleColors = ;
-                //if (!neighborPossibleColors.Contains(element.GetPixelFromCenter(neighborOffset)))
-                if (neighbor.PossibleElements.All(x => !x.MiddleColor.Equals(testPixel)))
+                else if (neighbor.PossibleElements.Any(x => x.MiddleColor.Equals(testPixel)))
                 {
-                    toBeRemoved.Add(element);
+                    toBeAssigned.Add(element);
                     break;
                 }
             }
         }
-        
-        PossibleElements = PossibleElements.Except(toBeRemoved).ToArray();
+
+        toBeAssigned.TrimExcess();
+        PossibleElements = toBeAssigned.ToArray();
 
         // foreach (var element in toBeRemoved)
         // {

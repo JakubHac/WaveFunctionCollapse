@@ -1,11 +1,10 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class Propagation : IOperation
 {
 	public Vector2Int Position;
-	private HashSet<Vector2Int> AlreadyVisited = new HashSet<Vector2Int>();
-	List<OutputPixel> ToBeVisited = new List<OutputPixel>();
 
 	public Propagation(Vector2Int position)
 	{
@@ -17,24 +16,32 @@ public class Propagation : IOperation
 	public void Execute()
 	{
 		var start = WFC.Output[(int)Position.x, (int)Position.y];
-		AlreadyVisited = new HashSet<Vector2Int>(){start.Position};
-		ToBeVisited = WFC.GetNeighbors(Position);
+		var alreadyVisited = new HashSet<Vector2Int>(){start.Position};
+		var toBeVisited = WFC.GetNeighbors(Position);
 
-		Debug.Log($"Propagation: {ToBeVisited.Count}");
+		#if UNITY_EDITOR
+		Debug.Log($"Propagation: {toBeVisited.Count}");
+		#endif
 		
-		while (ToBeVisited.Count > 0)
+		while (toBeVisited.Count > 0)
 		{
-			var current = ToBeVisited[0];
+			var current = toBeVisited[0];
 			var currentPosition = current.Position;
-			ToBeVisited.RemoveAt(0);
-			if (AlreadyVisited.Contains(currentPosition))
+			toBeVisited.RemoveAt(0);
+			if (alreadyVisited.Contains(currentPosition))
 			{
 				continue;
 			}
-			AlreadyVisited.Add(currentPosition);
+			alreadyVisited.Add(currentPosition);
 			if (current.RefreshPossibilites())
 			{
-				ToBeVisited.AddRange(WFC.GetNeighbors(current.Position));
+				foreach (var neighbor in WFC.GetNeighbors(currentPosition))
+				{
+					if (!alreadyVisited.Contains(neighbor.Position))
+					{
+						toBeVisited.Add(neighbor);
+					}
+				}
 			}
 		}
 	}
