@@ -144,26 +144,40 @@ public class OutputPixel
     {
         var neighbors =  WFC.GetNeighbors(Position);
         List<ElementWrapper> toBeAssigned = new List<ElementWrapper>(PossibleElements.Length);
-        
         foreach (ElementWrapper element in PossibleElements)
         {
+            bool isPossible = true;
+            
             foreach (var neighbor in neighbors)
             {
                 var neighborOffset = neighbor.Position - Position;
                 var testPixel = element.GetPixelFromCenter(neighborOffset);
                 if (neighbor.IsCollapsed)
                 {
-                    if (neighbor.Color.Equals(testPixel))
+                    if (!neighbor.Color.Equals(testPixel))
                     {
-                        toBeAssigned.Add(element);
+                        isPossible = false;
                         break;
                     }
                 }
-                else if (neighbor.PossibleElements.Any(x => x.MiddleColor.Equals(testPixel)))
+                else
                 {
-                    toBeAssigned.Add(element);
-                    break;
+                    var possibleColors = neighbor.PossibleElements.Select(x => x.MiddleColor).Distinct().ToList();
+                    if (possibleColors.Any(x => x.Equals(testPixel)))
+                    {
+                       
+                    }
+                    else
+                    {
+                        isPossible = false;
+                        break;
+                    }
                 }
+            }
+
+            if (isPossible)
+            {
+                toBeAssigned.Add(element);
             }
         }
         

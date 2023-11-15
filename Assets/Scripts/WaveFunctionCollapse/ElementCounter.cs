@@ -14,6 +14,10 @@ public class ElementCounter : MonoBehaviour
 	[SerializeField] private Button NextStepButton;
 	[SerializeField] private Button ManualButton;
 	[SerializeField] private ElementRotator ElementRotator;
+
+	[SerializeField] private UIView RotateView;
+	[SerializeField] private UIView WFCView;
+	
 	
 	private Dictionary<ElementWrapper, Counter> Counts = new();
 	
@@ -160,12 +164,14 @@ public class ElementCounter : MonoBehaviour
 		{
 			ElementRotator.Setup(Counts.Select(x => (x.Key, x.Value.Count)).ToList());
 			CounterParent.DestroyChildren<Counter>(x => x.RawImage.texture = null);
+			RotateView.Show();
 		}
 		else
 		{
 			Dictionary<ElementWrapper, int> elements = Counts.ToDictionary(x => x.Key, x => x.Value.Count);
 			FindObjectOfType<WFC>(includeInactive: true).StartAlogrithm(elements);
-			CounterParent.DestroyChildren<Counter>(x => { });
+			CounterParent.DestroyChildren<Counter>(x => x.RawImage.texture = null);
+			WFCView.Show();
 		}
 		Clear();
 	}
