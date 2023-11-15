@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
@@ -7,11 +8,20 @@ public class ElementWrapper : IEquatable<ElementWrapper>
     public readonly Texture2D Texture;
     public readonly Color MiddleColor;
     private int? _hashCode;
+    private Color[,] PixelsFromCenter;
+    Vector2Int Center;
 
     public ElementWrapper(Texture2D texture)
     {
         Texture = texture;
-        MiddleColor = texture.GetPixel(texture.width / 2, texture.height / 2);
+        Center = new Vector2Int(texture.width / 2, texture.height / 2);
+        PixelsFromCenter = new Color[texture.width, texture.height];
+        for (int x = 0; x < texture.width; x++)
+        for (int y = 0; y < texture.height; y++)
+        {
+            PixelsFromCenter[x, y] = texture.GetPixel(x, y);
+        }
+        MiddleColor = PixelsFromCenter[Center.x, Center.y];
         _hashCode = null;
     }
 
@@ -59,9 +69,11 @@ public class ElementWrapper : IEquatable<ElementWrapper>
     }
 
     public override int GetHashCode() => _hashCode ??= CalcHashCode();
-
-    public Color GetPixelFromCenter(Vector2Int neighborOffset)
+    
+    public Color GetPixelFromCenter(int xOffset, int yOffset)
     {
-        return Texture.GetPixel(Texture.width / 2 + neighborOffset.x, Texture.height / 2 + neighborOffset.y);
+        return PixelsFromCenter[xOffset + Center.x, yOffset + Center.y];
     }
+
+    public Color GetPixelFromCenter(Vector2Int neighborOffset) => GetPixelFromCenter(neighborOffset.x, neighborOffset.y);
 }

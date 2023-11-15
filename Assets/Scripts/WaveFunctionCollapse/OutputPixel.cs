@@ -1,187 +1,188 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Linq;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
 public class OutputPixel
 {
-    public bool IsCollapsed = false;
-    private Color Color;
-    private ElementWrapper[] PossibleElements;
-    public Vector2Int Position;
+	public bool IsCollapsed = false;
+	private Color Color;
+	private ElementWrapper[] PossibleElements;
+	public Vector2Int Position;
+	private List<Color> PossibleColors;
 
-    public OutputPixel(ElementWrapper[] elements, Vector2Int position, Color? firstColor)
-    {
-        PossibleElements = elements;
-        Position = position;
-        
-        if (firstColor != null)
-        {
-            Debug.LogWarning("Only one possible color from the start!");
-            Collapse(firstColor.Value);
-        }
-    }
+	public OutputPixel(ElementWrapper[] elements, Vector2Int position, Color? firstColor)
+	{
+		PossibleElements = elements;
+		PossibleColors = elements.Select(x => x.MiddleColor).Distinct().ToList();
+		Position = position;
 
-    public void Collapse(Color color)
-    {
-        if (!PossibleElements.Any(x => x.MiddleColor.Equals(color)))
-        {
-            Debug.LogError("How are we getting a color that isn't in the list of possible elements?");
-        }
-        
-        IsCollapsed = true;
-        Color = color;
-        PossibleElements = Array.Empty<ElementWrapper>();
-    }
-    
-    public void Collapse()
-    {
-        IsCollapsed = true;
-        Dictionary<ElementWrapper, int> elementsPossibilities = new();
-        int sum = 0;
-        for (int i = 0; i < PossibleElements.Length; i++)
-        {
-            var element = PossibleElements[i];
-            int elementWeight = WFC.Elements[element];
-            sum += elementWeight;
-            elementsPossibilities.Add(element, elementWeight);
-        }
+		if (firstColor != null)
+		{
+			Debug.LogWarning("Only one possible color from the start!");
+			Collapse(firstColor.Value);
+		}
+	}
 
-        int random = Random.Range(0, sum);
-        for (int i = 0; i < elementsPossibilities.Count; i++)
-        {
-            var element = elementsPossibilities.ElementAt(i);
-            random -= element.Value;
-            if (random < 0)
-            {
-                Color = element.Key.MiddleColor;
-                break;
-            }
-        }
-        
-        PossibleElements = Array.Empty<ElementWrapper>();
-    }
+	public void Collapse(Color color)
+	{
+		if (!PossibleElements.Any(x => x.MiddleColor.Equals(color)))
+		{
+			Debug.LogError("How are we getting a color that isn't in the list of possible elements?");
+		}
 
-    public Color GetColor()
-    {
-        if (IsCollapsed)
-        {
-            return Color;
-        }
+		IsCollapsed = true;
+		Color = color;
+		PossibleElements = Array.Empty<ElementWrapper>();
+		PossibleColors = new List<Color>() { color };
+	}
 
-        if (PossibleElements.Length == 0)
-        {
-            return Color.magenta;
-        }
+	public void Collapse()
+	{
+		IsCollapsed = true;
+		Dictionary<ElementWrapper, int> elementsPossibilities = new();
+		int sum = 0;
+		for (int i = 0; i < PossibleElements.Length; i++)
+		{
+			var element = PossibleElements[i];
+			int elementWeight = WFC.Elements[element];
+			sum += elementWeight;
+			elementsPossibilities.Add(element, elementWeight);
+		}
 
-        float r = 0f;
-        float g = 0f;
-        float b = 0f;
-        int possibleELementsCount = PossibleElements.Length;
-        foreach (var element in PossibleElements)
-        {
-            var color = element.MiddleColor;
-            r += color.r / possibleELementsCount;
-            g += color.g / possibleELementsCount;
-            b += color.b / possibleELementsCount;
-        }
+		int random = Random.Range(0, sum);
+		for (int i = 0; i < elementsPossibilities.Count; i++)
+		{
+			var element = elementsPossibilities.ElementAt(i);
+			random -= element.Value;
+			if (random < 0)
+			{
+				Color = element.Key.MiddleColor;
+				break;
+			}
+		}
 
-        return new Color(r, g, b, 1f);
-    }
-    
-    public float GetUncertainty()
-    {
-        if (IsCollapsed)
-        {
-            return 0;
-        }
+		PossibleElements = Array.Empty<ElementWrapper>();
+		PossibleColors = new List<Color>() { Color };
+	}
 
-        if (PossibleElements.Length < 1)
-        {
-            return -1;
-        }
-        
-        var value = (float)PossibleElements.Length / WFC.AllElementsCount;
-        var inverseLerp = Mathf.InverseLerp(1f, 1f / WFC.AllElementsCount, value);
-        var lerp = Mathf.Lerp(1f, 0f, inverseLerp);
-        return lerp;
-    }
+	public Color GetColor()
+	{
+		if (IsCollapsed)
+		{
+			return Color;
+		}
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <returns>true if possible colors changed</returns>
-    public bool RefreshPossibilites()
-    {
-        if (IsCollapsed)
-        {
-            return false;
-        }
+		if (PossibleColors.Count == 0)
+		{
+			return Color.magenta;
+		}
 
-        var possibleColorsBefore = PossibleElements.Select(x => x.MiddleColor).Distinct().Count();
-        Refresh();
-        
-        if (PossibleElements.Length == 0)
-        {
-            Debug.LogError($"No possible colors after refresh! {Position}");
-            return possibleColorsBefore != 0;
-        }
-        
-        var possibleColorsAfter = PossibleElements.Select(x => x.MiddleColor).Distinct().ToArray();
+		float r = 0f;
+		float g = 0f;
+		float b = 0f;
+		int possibleELementsCount = PossibleColors.Count;
+		foreach (var color in PossibleColors)
+		{
+			r += color.r / possibleELementsCount;
+			g += color.g / possibleELementsCount;
+			b += color.b / possibleELementsCount;
+		}
 
-        if (possibleColorsAfter.Length == 1)
-        {
-            Collapse(possibleColorsAfter.First());
-            return true;
-        }
+		return new Color(r, g, b, 1f);
+	}
 
-        return possibleColorsBefore != possibleColorsAfter.Length;
-    }
+	public float GetUncertainty()
+	{
+		if (IsCollapsed)
+		{
+			return 0;
+		}
 
-    private void Refresh()
-    {
-        var neighbors =  WFC.GetNeighbors(Position);
-        List<ElementWrapper> toBeAssigned = new List<ElementWrapper>(PossibleElements.Length);
-        foreach (ElementWrapper element in PossibleElements)
-        {
-            bool isPossible = true;
-            
-            foreach (var neighbor in neighbors)
-            {
-                var neighborOffset = neighbor.Position - Position;
-                var testPixel = element.GetPixelFromCenter(neighborOffset);
-                if (neighbor.IsCollapsed)
-                {
-                    if (!neighbor.Color.Equals(testPixel))
-                    {
-                        isPossible = false;
-                        break;
-                    }
-                }
-                else
-                {
-                    var possibleColors = neighbor.PossibleElements.Select(x => x.MiddleColor).Distinct().ToList();
-                    if (possibleColors.Any(x => x.Equals(testPixel)))
-                    {
-                       
-                    }
-                    else
-                    {
-                        isPossible = false;
-                        break;
-                    }
-                }
-            }
+		if (PossibleElements.Length < 1)
+		{
+			return -1;
+		}
 
-            if (isPossible)
-            {
-                toBeAssigned.Add(element);
-            }
-        }
-        
-        toBeAssigned.TrimExcess();
-        PossibleElements = toBeAssigned.ToArray();
-    }
+		var value = (float)PossibleElements.Length / WFC.AllElementsCount;
+		var inverseLerp = Mathf.InverseLerp(1f, 1f / WFC.AllElementsCount, value);
+		var lerp = Mathf.Lerp(1f, 0f, inverseLerp);
+		return lerp;
+	}
+
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <returns>true if possible colors changed</returns>
+	public bool RefreshPossibilites()
+	{
+		if (IsCollapsed)
+		{
+			return false;
+		}
+
+		var possibleColorsBefore = PossibleColors.Count;
+		Refresh();
+
+		if (PossibleColors.Count == 0)
+		{
+			Debug.LogError($"No possible colors after refresh! {Position}");
+			return possibleColorsBefore != 0;
+		}
+
+		if (PossibleColors.Count == 1)
+		{
+			Collapse(PossibleColors[0]);
+			return true;
+		}
+
+		return possibleColorsBefore != PossibleColors.Count;
+	}
+
+	private List<ElementWrapper> RefreshToBeAssigned = new List<ElementWrapper>();
+
+	private void Refresh()
+	{
+		var neighbors = WFC.GetNeighbors(Position);
+		RefreshToBeAssigned.Clear();
+		foreach (ElementWrapper element in PossibleElements)
+		{
+			bool isPossible = true;
+
+			foreach (var neighbor in neighbors)
+			{
+				var testPixel = element.GetPixelFromCenter(neighbor.Position.x - Position.x, neighbor.Position.y - Position.y);
+				bool matches = false;
+				foreach (var color in neighbor.PossibleColors)
+				{
+					if (color.Equals(testPixel))
+					{
+						matches = true;
+						break;
+					};
+				}
+
+				if (!matches)
+				{
+					isPossible = false;
+					break;
+				}
+			}
+
+			if (isPossible)
+			{
+				RefreshToBeAssigned.Add(element);
+			}
+		}
+		PossibleElements = RefreshToBeAssigned.ToArray();
+		PossibleColors.Clear();
+		foreach (var wrapper in PossibleElements)
+		{
+			if (!PossibleColors.Contains<Color>(wrapper.MiddleColor))
+			{
+				PossibleColors.Add(wrapper.MiddleColor);
+			}
+		}
+	}
 }

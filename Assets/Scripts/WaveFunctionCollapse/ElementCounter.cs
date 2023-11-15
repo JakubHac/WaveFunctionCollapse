@@ -30,7 +30,7 @@ public class ElementCounter : MonoBehaviour
 	public void Setup(WFCSetup setup)
 	{
 		OrigTexture = setup.InputTexture;
-		X = 1;
+		X = Mathf.FloorToInt(setup.KernelSize / 2f);
 		Y = OrigTexture.height - Mathf.CeilToInt(setup.KernelSize / 2f);
 		kernelSize = setup.KernelSize;
 		
@@ -124,8 +124,13 @@ public class ElementCounter : MonoBehaviour
 		if (!CanCount()) return;
 
 		Texture2D textureElement = Texture2DExtensions.CreatePixelTexture(kernelSize, kernelSize);
-		textureElement.SetPixels(OrigTexture.GetPixels(X - Mathf.FloorToInt(kernelSize / 2f),
-			Y - Mathf.FloorToInt(kernelSize / 2f), kernelSize, kernelSize));
+		textureElement.SetPixels(
+			OrigTexture.GetPixels(
+			X - Mathf.FloorToInt(kernelSize / 2f), 
+			Y - Mathf.FloorToInt(kernelSize / 2f), 
+			kernelSize, 
+			kernelSize
+		));
 		textureElement.Apply();
 
 		var elementWrapper = new ElementWrapper(textureElement);
@@ -147,7 +152,7 @@ public class ElementCounter : MonoBehaviour
 
 		if (NeedsToGoToNextRow())
 		{
-			X = 1;
+			X = Mathf.FloorToInt(kernelSize / 2f);
 			Y--;
 		}
 		else

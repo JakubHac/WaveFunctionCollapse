@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9007eec36f52f6044b5991b6674f58da, type: 3}
   m_Name: WFC Preset Flowers
   m_EditorClassIdentifier: 
-  KernelSize: 3
+  KernelSize: 5
   OutputWidth: 64
   OutputHeight: 64
   Ground: 1
