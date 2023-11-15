@@ -139,10 +139,9 @@ public class WFC : MonoBehaviour
 		ColorsElements.Clear();
 		Elements = elements;
 		Output = new OutputPixel[Setup.OutputWidth, Setup.OutputHeight];
-		AllElementsCount = 0;
+		AllElementsCount = elements.Count;
 		foreach (var element in Elements)
 		{
-			AllElementsCount += element.Value;
 			if (ColorsElements.ContainsKey(element.Key.MiddleColor))
 			{
 				ColorsElements[element.Key.MiddleColor].Add(element.Key);

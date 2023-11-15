@@ -16,7 +16,6 @@ public class OutputPixel
     {
         PossibleElements = elements;
         Position = position;
-        PossibleElements = elements;
         
         if (firstColor != null)
         {
@@ -145,7 +144,7 @@ public class OutputPixel
     {
         var neighbors =  WFC.GetNeighbors(Position);
         List<ElementWrapper> toBeAssigned = new List<ElementWrapper>(PossibleElements.Length);
-
+        
         foreach (ElementWrapper element in PossibleElements)
         {
             foreach (var neighbor in neighbors)
@@ -167,13 +166,8 @@ public class OutputPixel
                 }
             }
         }
-
+        
         toBeAssigned.TrimExcess();
         PossibleElements = toBeAssigned.ToArray();
-
-        // foreach (var element in toBeRemoved)
-        // {
-        //     PossibleElements.Remove(element);
-        // }
     }
 }

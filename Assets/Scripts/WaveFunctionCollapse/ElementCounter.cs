@@ -156,8 +156,17 @@ public class ElementCounter : MonoBehaviour
 
 	public void MoveDataToRotator()
 	{
-		ElementRotator.Setup(Counts.Select(x => (x.Key, x.Value.Count)).ToList());
-		CounterParent.DestroyChildren<Counter>(x => x.RawImage.texture = null);
+		if (WFC.Setup.Rotate)
+		{
+			ElementRotator.Setup(Counts.Select(x => (x.Key, x.Value.Count)).ToList());
+			CounterParent.DestroyChildren<Counter>(x => x.RawImage.texture = null);
+		}
+		else
+		{
+			Dictionary<ElementWrapper, int> elements = Counts.ToDictionary(x => x.Key, x => x.Value.Count);
+			FindObjectOfType<WFC>(includeInactive: true).StartAlogrithm(elements);
+			CounterParent.DestroyChildren<Counter>(x => { });
+		}
 		Clear();
 	}
 	

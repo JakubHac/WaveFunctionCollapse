@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Propagation : IOperation
 {
-	public Vector2Int Position;
+	private readonly Vector2Int Position;
 
 	public Propagation(Vector2Int position)
 	{
@@ -17,7 +17,7 @@ public class Propagation : IOperation
 	{
 		var start = WFC.Output[(int)Position.x, (int)Position.y];
 		var alreadyVisited = new HashSet<Vector2Int>(){start.Position};
-		var toBeVisited = WFC.GetNeighbors(Position);
+		var toBeVisited = new Queue<OutputPixel>(WFC.GetNeighbors(Position)); 
 
 		#if UNITY_EDITOR
 		Debug.Log($"Propagation: {toBeVisited.Count}");
@@ -25,9 +25,8 @@ public class Propagation : IOperation
 		
 		while (toBeVisited.Count > 0)
 		{
-			var current = toBeVisited[0];
+			var current = toBeVisited.Dequeue();
 			var currentPosition = current.Position;
-			toBeVisited.RemoveAt(0);
 			if (alreadyVisited.Contains(currentPosition))
 			{
 				continue;
@@ -39,7 +38,7 @@ public class Propagation : IOperation
 				{
 					if (!alreadyVisited.Contains(neighbor.Position))
 					{
-						toBeVisited.Add(neighbor);
+						toBeVisited.Enqueue(neighbor);
 					}
 				}
 			}
