@@ -6,11 +6,13 @@ public class ElementWrapper : IEquatable<ElementWrapper>
 {
     public readonly Texture2D Texture;
     public readonly Color MiddleColor;
+    private int? _hashCode;
 
     public ElementWrapper(Texture2D texture)
     {
         Texture = texture;
         MiddleColor = texture.GetPixel(texture.width / 2, texture.height / 2);
+        _hashCode = null;
     }
 
     public bool Equals(ElementWrapper other)
@@ -43,7 +45,7 @@ public class ElementWrapper : IEquatable<ElementWrapper>
         return Equals((ElementWrapper)obj);
     }
 
-    public override int GetHashCode()
+    private int CalcHashCode()
     {
         if (Texture == null) return 0;
         
@@ -55,6 +57,8 @@ public class ElementWrapper : IEquatable<ElementWrapper>
 
         return hashCode.ToHashCode();
     }
+
+    public override int GetHashCode() => _hashCode ??= CalcHashCode();
 
     public Color GetPixelFromCenter(Vector2Int neighborOffset)
     {

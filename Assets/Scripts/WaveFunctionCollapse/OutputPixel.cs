@@ -1,26 +1,27 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class OutputPixel
 {
     public bool IsCollapsed = false;
-    public Color Color;
-    public HashSet<ElementWrapper> PossibleElements = new();
+    private Color Color;
+    private ElementWrapper[] PossibleElements;
     public Vector2Int Position;
 
-    public OutputPixel(HashSet<ElementWrapper> elements, Vector2Int position)
+    public OutputPixel(ElementWrapper[] elements, Vector2Int position, Color? firstColor)
     {
         PossibleElements = elements;
         Position = position;
         PossibleElements = elements;
         
-        var possibleColors = PossibleElements.Select(x => x.MiddleColor).ToHashSet();
-        if (possibleColors.Count == 1)
+        if (firstColor != null)
         {
             Debug.LogWarning("Only one possible color from the start!");
-            Collapse(possibleColors.First());
+            Collapse(firstColor.Value);
         }
     }
 
@@ -33,7 +34,7 @@ public class OutputPixel
         
         IsCollapsed = true;
         Color = color;
-        PossibleElements.Clear();
+        PossibleElements = Array.Empty<ElementWrapper>();
     }
     
     public void Collapse()
@@ -41,8 +42,9 @@ public class OutputPixel
         IsCollapsed = true;
         Dictionary<ElementWrapper, int> elementsPossibilities = new();
         int sum = 0;
-        foreach (var element in PossibleElements)
+        for (int i = 0; i < PossibleElements.Length; i++)
         {
+            var element = PossibleElements[i];
             int elementWeight = WFC.Elements[element];
             sum += elementWeight;
             elementsPossibilities.Add(element, elementWeight);
@@ -60,7 +62,7 @@ public class OutputPixel
             }
         }
         
-        PossibleElements.Clear();
+        PossibleElements = Array.Empty<ElementWrapper>();
     }
 
     public Color GetColor()
@@ -70,18 +72,24 @@ public class OutputPixel
             return Color;
         }
 
-        if (PossibleElements.Count == 0)
+        if (PossibleElements.Length == 0)
         {
             return Color.magenta;
         }
 
-        List<Color> colors = new List<Color>();
-        foreach (var color in PossibleElements.Select(x => x.MiddleColor))
+        float r = 0f;
+        float g = 0f;
+        float b = 0f;
+        int possibleELementsCount = PossibleElements.Length;
+        foreach (var element in PossibleElements)
         {
-            colors.Add(color / PossibleElements.Count);
+            var color = element.MiddleColor;
+            r += color.r / possibleELementsCount;
+            g += color.g / possibleELementsCount;
+            b += color.b / possibleELementsCount;
         }
 
-        return colors.Aggregate((x, y) => x + y);
+        return new Color(r, g, b, 1f);
     }
     
     public float GetUncertainty()
@@ -91,12 +99,15 @@ public class OutputPixel
             return 0;
         }
 
-        if (PossibleElements.Count < 1)
+        if (PossibleElements.Length < 1)
         {
             return -1;
         }
-
-        return Mathf.Lerp(1f, 0f, Mathf.InverseLerp(1f, 1f / WFC.ColorsElements.Count, (float)PossibleElements.Count / WFC.ColorsElements.Count));
+        
+        var value = (float)PossibleElements.Length / WFC.AllElementsCount;
+        var inverseLerp = Mathf.InverseLerp(1f, 1f / WFC.AllElementsCount, value);
+        var lerp = Mathf.Lerp(1f, 0f, inverseLerp);
+        return lerp;
     }
 
     /// <summary>
@@ -110,22 +121,22 @@ public class OutputPixel
             return false;
         }
         
-        var possibleColorsBefore = PossibleElements.Select(x => x.MiddleColor).ToHashSet();
+        var possibleColorsBefore = PossibleElements.Select(x => x.MiddleColor).Distinct().ToArray();
         Refresh();
-        var possibleColorsAfter = PossibleElements.Select(x => x.MiddleColor).ToHashSet();
+        var possibleColorsAfter = PossibleElements.Select(x => x.MiddleColor).Distinct().ToArray();
 
-        if (possibleColorsAfter.Count == 0)
+        if (possibleColorsAfter.Length == 0)
         {
             Debug.LogError($"No possible colors after refresh! {Position}");
         }
 
-        if (possibleColorsAfter.Count == 1)
+        if (possibleColorsAfter.Length == 1)
         {
             Collapse(possibleColorsAfter.First());
             return true;
         }
-        
-        return !possibleColorsBefore.SetEquals(possibleColorsAfter);
+
+        return possibleColorsBefore.Length != possibleColorsAfter.Length;
     }
 
     private void Refresh()
@@ -138,18 +149,30 @@ public class OutputPixel
             foreach (var neighbor in neighbors)
             {
                 var neighborOffset = neighbor.Position - Position;
-                var neighorPossibleColors = neighbor.PossibleElements.Select(x => x.MiddleColor).ToList();
-                if (!neighorPossibleColors.Contains(element.GetPixelFromCenter(neighborOffset)))
+                var testPixel = element.GetPixelFromCenter(neighborOffset);
+                if (neighbor.IsCollapsed)
+                {
+                    if (!neighbor.Color.Equals(testPixel))
+                    {
+                        toBeRemoved.Add(element);
+                        break;
+                    }
+                }
+                //var neighborPossibleColors = ;
+                //if (!neighborPossibleColors.Contains(element.GetPixelFromCenter(neighborOffset)))
+                if (neighbor.PossibleElements.All(x => !x.MiddleColor.Equals(testPixel)))
                 {
                     toBeRemoved.Add(element);
                     break;
                 }
             }
         }
+        
+        PossibleElements = PossibleElements.Except(toBeRemoved).ToArray();
 
-        foreach (var element in toBeRemoved)
-        {
-            PossibleElements.Remove(element);
-        }
+        // foreach (var element in toBeRemoved)
+        // {
+        //     PossibleElements.Remove(element);
+        // }
     }
 }

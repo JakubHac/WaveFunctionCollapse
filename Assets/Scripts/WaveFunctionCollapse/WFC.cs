@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using UnityEngine;
 
 public class WFC : MonoBehaviour
@@ -16,6 +17,7 @@ public class WFC : MonoBehaviour
 	public static OutputPixel[,] Output;
 	Texture2D OutputTexture;
 	public static Dictionary<Color, List<ElementWrapper>> ColorsElements = new();
+	public static int AllElementsCount;
 	private static WFC _instance;
 	static List<IOperation> Operations = new ();
 	
@@ -76,10 +78,13 @@ public class WFC : MonoBehaviour
 		{
 			CollapseMostCertain();
 		}
-		
-		var operation = Operations[0];
-		Operations = Operations.Skip(1).ToList();
-		operation.Execute();
+
+		while (Operations.Count > 0)
+		{
+			var operation = Operations[0];
+			Operations = Operations.Skip(1).ToList();
+			operation.Execute();
+		}
 		
 		RefreshOutputTexture();
 		MeshController.RefreshFromMaterialTexture();
@@ -91,6 +96,7 @@ public class WFC : MonoBehaviour
 		var mostCertain = Output.Cast<OutputPixel>().Where(x => !x.IsCollapsed).OrderBy(x => x.GetUncertainty()).First();
 		
 		Operations.Add(new Collapse(mostCertain.Position));
+		Operations.Add(new Propagation(mostCertain.Position));
 	}
 
 	private void RefreshOutputTexture()
@@ -133,8 +139,10 @@ public class WFC : MonoBehaviour
 		ColorsElements.Clear();
 		Elements = elements;
 		Output = new OutputPixel[Setup.OutputWidth, Setup.OutputHeight];
+		AllElementsCount = 0;
 		foreach (var element in Elements)
 		{
+			AllElementsCount += element.Value;
 			if (ColorsElements.ContainsKey(element.Key.MiddleColor))
 			{
 				ColorsElements[element.Key.MiddleColor].Add(element.Key);
@@ -144,22 +152,41 @@ public class WFC : MonoBehaviour
 				ColorsElements.Add(element.Key.MiddleColor, new List<ElementWrapper>(){element.Key});
 			}
 		}
+		
+		//AllElementsCount = ColorsElements.Sum(x => x.Value.Count);
+		
+		var distinctElementWrappers = Elements.Keys.ToHashSet().ToArray();
+
+		Color? firstColor = null;
+		foreach (var wrapper in distinctElementWrappers)
+		{
+			if (firstColor == null)
+			{
+				firstColor = wrapper.MiddleColor;
+			}
+			else if (!firstColor.Equals(wrapper.MiddleColor))
+			{
+				firstColor = null;
+				break;
+			}
+		}
 
 		for (int x = 0; x < Setup.OutputWidth; x++)
 		for (int y = 0; y < Setup.OutputHeight; y++)
 		{
-			Output[x, y] = new OutputPixel(Elements.Keys.ToHashSet(), new Vector2Int(x,y));
+			
+			Output[x, y] = new OutputPixel(distinctElementWrappers, new Vector2Int(x,y), firstColor);
 		}
 	}
 
 	private void PreserveGround()
 	{
 		Debug.Log("Preserve ground");
-		var lastY = Output.GetLength(1) - 1;
+		var lastY = 0;
 		for (int x = 0; x < Setup.OutputWidth; x++)
 		{
 			Vector2Int position = new Vector2Int(x, lastY);
-			IOperation collapse = new Collapse( position, Setup.InputTexture.GetPixel(x, Setup.InputTexture.height - 1));
+			IOperation collapse = new Collapse( position, Setup.InputTexture.GetPixel(x, 0));
 			IOperation propagation = new Propagation(position);
 			//Output[x, lastY].Collapse(Setup.InputTexture.GetPixel(x, Setup.InputTexture.height - 1));
 			//Propagate(x, lastY);
