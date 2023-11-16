@@ -93,10 +93,25 @@ public class WFC : MonoBehaviour
 	private void CollapseMostCertain()
 	{
 		Debug.Log("Debug most certain");
-		var mostCertain = Output.Cast<OutputPixel>().Where(x => !x.IsCollapsed).OrderBy(x => x.GetUncertainty()).First();
+		var orderedByUncertainty = Output.Cast<OutputPixel>().Where(x => !x.IsCollapsed).OrderBy(x => x.GetUncertainty()).ToList();
+		var treshold = orderedByUncertainty[0].GetUncertainty();
+		List<OutputPixel> possiblePixels = new List<OutputPixel>();
+		foreach (var pixel in orderedByUncertainty)
+		{
+			if (pixel.GetUncertainty() <= treshold)
+			{
+				possiblePixels.Add(pixel);
+			}
+			else
+			{
+				break;
+			}
+		}
 		
-		Operations.Add(new Collapse(mostCertain.Position));
-		Operations.Add(new Propagation(mostCertain.Position));
+		int randomIndex = Random.Range(0, possiblePixels.Count);
+		
+		Operations.Add(new Collapse(possiblePixels[randomIndex].Position));
+		Operations.Add(new Propagation(possiblePixels[randomIndex].Position));
 	}
 
 	private void RefreshOutputTexture()

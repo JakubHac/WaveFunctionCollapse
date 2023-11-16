@@ -12,15 +12,16 @@ Shader "Custom/WFCOutputShader"
 
     SubShader
     {
-        Tags
-        {
-            "RenderType" = "Opaque"
+        Tags {
+            "Queue" = "Opaque" 
+            "RenderType"="Opaque" 
         }
 
         CGPROGRAM
         //Notice the "vertex:vert" at the end of the next line
         #pragma target 5.0
         #pragma surface surf Standard fullforwardshadows vertex:vert
+        
 
         sampler2D _MainTex;
 
@@ -53,8 +54,11 @@ Shader "Custom/WFCOutputShader"
         void surf(Input IN, inout SurfaceOutputStandard o)
         {
             fixed4 c = tex2D(_MainTex, IN.uv_MainTex) * _Color;
+            o.Emission = c.rgb;
+            o.Metallic = 0;
+            o.Smoothness = 0;
             o.Albedo = c.rgb;
-            o.Alpha = c.a;
+            o.Alpha = 0;
         }
         ENDCG
     }

@@ -11982,7 +11982,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e22eec07794e168408f41b075b9dc178, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  AutomaticDelay: 0.05
+  AutomaticDelay: 0.001
   Button: {fileID: 1976374456}
   OnClick:
     m_PersistentCalls:

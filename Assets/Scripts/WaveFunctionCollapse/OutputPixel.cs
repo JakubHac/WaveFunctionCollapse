@@ -82,12 +82,13 @@ public class OutputPixel
 		float r = 0f;
 		float g = 0f;
 		float b = 0f;
-		int possibleELementsCount = PossibleColors.Count;
-		foreach (var color in PossibleColors)
+		int possibleElementsCount = PossibleElements.Length;
+		foreach (var element in PossibleElements)
 		{
-			r += color.r / possibleELementsCount;
-			g += color.g / possibleELementsCount;
-			b += color.b / possibleELementsCount;
+			var color = element.MiddleColor;
+			r += color.r / possibleElementsCount;
+			g += color.g / possibleElementsCount;
+			b += color.b / possibleElementsCount;
 		}
 
 		return new Color(r, g, b, 1f);
