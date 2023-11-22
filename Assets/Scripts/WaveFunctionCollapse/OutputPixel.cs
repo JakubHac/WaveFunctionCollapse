@@ -12,6 +12,15 @@ public class OutputPixel
 	public Vector2Int Position;
 	private List<Color> PossibleColors;
 
+	public OutputPixel(OutputPixel other)
+	{
+		IsCollapsed = other.IsCollapsed;
+		Color = other.Color;
+		PossibleElements = other.PossibleElements;
+		Position = other.Position;
+		PossibleColors = other.PossibleColors;
+	}
+	
 	public OutputPixel(ElementWrapper[] elements, Vector2Int position, Color? firstColor)
 	{
 		PossibleElements = elements;
@@ -21,12 +30,18 @@ public class OutputPixel
 		if (firstColor != null)
 		{
 			Debug.LogWarning("Only one possible color from the start!");
-			Collapse(firstColor.Value);
+			Collapse(firstColor.Value, false);
 		}
 	}
 
-	public void Collapse(Color color)
+	public void Collapse(Color color, bool snapshot)
 	{
+		// if (snapshot)
+		// {
+		// 	WFC.TakeSnapshot();
+		// }
+		
+		
 		if (!PossibleElements.Any(x => x.MiddleColor.Equals(color)))
 		{
 			Debug.LogError("How are we getting a color that isn't in the list of possible elements?");
@@ -38,8 +53,13 @@ public class OutputPixel
 		PossibleColors = new List<Color>() { color };
 	}
 
-	public void Collapse()
+	public void Collapse(bool snapshot)
 	{
+		// if (snapshot)
+		// {
+		// 	WFC.TakeSnapshot();
+		// }
+		
 		IsCollapsed = true;
 		Dictionary<ElementWrapper, int> elementsPossibilities = new();
 		int sum = 0;
@@ -134,7 +154,7 @@ public class OutputPixel
 
 		if (PossibleColors.Count == 1)
 		{
-			Collapse(PossibleColors[0]);
+			Collapse(PossibleColors[0], true);
 			return true;
 		}
 

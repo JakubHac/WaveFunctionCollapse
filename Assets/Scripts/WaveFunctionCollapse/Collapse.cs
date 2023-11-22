@@ -18,11 +18,11 @@ public class Collapse : IOperation
         var outputPixel = WFC.Output[(int)Position.x, (int)Position.y];
         if (Color != null)
         {
-            outputPixel.Collapse(Color.Value);
+            outputPixel.Collapse(Color.Value, true);
         }
         else
         {
-            outputPixel.Collapse();
+            outputPixel.Collapse(true);
         }
     }
 }

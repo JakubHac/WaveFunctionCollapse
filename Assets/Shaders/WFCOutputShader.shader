@@ -13,7 +13,6 @@ Shader "Custom/WFCOutputShader"
     SubShader
     {
         Tags {
-            "Queue" = "Opaque" 
             "RenderType"="Opaque" 
         }
 
@@ -21,7 +20,6 @@ Shader "Custom/WFCOutputShader"
         //Notice the "vertex:vert" at the end of the next line
         #pragma target 5.0
         #pragma surface surf Standard fullforwardshadows vertex:vert
-        
 
         sampler2D _MainTex;
 

@@ -1,7 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class WFC : MonoBehaviour
 {
@@ -9,8 +10,12 @@ public class WFC : MonoBehaviour
 	[SerializeField] private UIView CountElementsView;
 	[SerializeField] private Material OutputMaterial;
 	[SerializeField] private OutputMeshController MeshController;
+	[SerializeField] private AutomaticButton AutoCollapseButton;
 	
-
+	
+	public static Stack<OutputPixel[,]> OutputHistory = new Stack<OutputPixel[,]>();
+	public static Stack<Random.State> RandomStateHistory = new Stack<Random.State>();
+	
 	bool PreservedGround = false;
 	public static WFCSetup Setup;
 	public static Dictionary<ElementWrapper, int> Elements;
@@ -20,7 +25,23 @@ public class WFC : MonoBehaviour
 	public static int AllElementsCount;
 	private static WFC _instance;
 	static List<IOperation> Operations = new ();
-	
+
+	private void Start()
+	{
+		var state = Random.state;
+
+		for (int i = 0; i < 5; i++)
+		{
+			Debug.Log(Random.value);
+		}
+		Random.state = state;
+		
+		for (int i = 0; i < 5; i++)
+		{
+			Debug.Log(Random.value);
+		}
+	}
+
 	public static List<OutputPixel> GetNeighbors(Vector2Int center)
 	{
 		List<OutputPixel> neighbors = new List<OutputPixel>();
@@ -55,12 +76,14 @@ public class WFC : MonoBehaviour
 		}
 
 		Instance.CountElementsView.Show();
-		ElementCounter counter = Object.FindObjectOfType<ElementCounter>(includeInactive: true);
+		ElementCounter counter = FindObjectOfType<ElementCounter>(includeInactive: true);
 		counter.Setup(Setup);
 	}
 
 	public void StartAlogrithm(Dictionary<ElementWrapper, int> elements)
 	{
+		Random.InitState(1234567890);
+		AutoCollapseButton.Disable();
 		SetupOutput(elements);
 		RefreshOutputTexture();
 		MeshController.SetupMeshFromTexture();
@@ -68,7 +91,8 @@ public class WFC : MonoBehaviour
 
 	public void NextStep()
 	{
-		Debug.Log("Next step");
+		TakeSnapshot();
+		Debug.Log($"Next step, R: {Random.state.GetHashCode()}");
 		if (!PreservedGround && Setup.Ground)
 		{
 			PreserveGround();
@@ -94,6 +118,12 @@ public class WFC : MonoBehaviour
 	{
 		Debug.Log("Debug most certain");
 		var orderedByUncertainty = Output.Cast<OutputPixel>().Where(x => !x.IsCollapsed).OrderBy(x => x.GetUncertainty()).ToList();
+		if (orderedByUncertainty.Count == 0)
+		{
+			AutoCollapseButton.Disable();
+			Debug.Log("WFC finished");
+			return;
+		}
 		var treshold = orderedByUncertainty[0].GetUncertainty();
 		List<OutputPixel> possiblePixels = new List<OutputPixel>();
 		foreach (var pixel in orderedByUncertainty)
@@ -151,10 +181,10 @@ public class WFC : MonoBehaviour
 
 	private void SetupOutput(Dictionary<ElementWrapper, int> elements)
 	{
-		ColorsElements.Clear();
 		Elements = elements;
 		Output = new OutputPixel[Setup.OutputWidth, Setup.OutputHeight];
 		AllElementsCount = elements.Count;
+		ColorsElements.Clear();
 		foreach (var element in Elements)
 		{
 			if (ColorsElements.ContainsKey(element.Key.MiddleColor))
@@ -166,8 +196,6 @@ public class WFC : MonoBehaviour
 				ColorsElements.Add(element.Key.MiddleColor, new List<ElementWrapper>(){element.Key});
 			}
 		}
-		
-		//AllElementsCount = ColorsElements.Sum(x => x.Value.Count);
 		
 		var distinctElementWrappers = Elements.Keys.ToHashSet().ToArray();
 
@@ -185,11 +213,46 @@ public class WFC : MonoBehaviour
 			}
 		}
 
+		
 		for (int x = 0; x < Setup.OutputWidth; x++)
 		for (int y = 0; y < Setup.OutputHeight; y++)
 		{
-			
 			Output[x, y] = new OutputPixel(distinctElementWrappers, new Vector2Int(x,y), firstColor);
+		}
+		
+		OutputHistory.Clear();
+		RandomStateHistory.Clear();
+	}
+
+	public static void TakeSnapshot()
+	{
+		int rows = Output.GetLength(0);
+		int cols = Output.GetLength(1);
+		OutputPixel[,] copiedArray = new OutputPixel[rows, cols];
+		for (int i = 0; i < rows; i++)
+		{
+			for (int j = 0; j < cols; j++)
+			{
+				copiedArray[i, j] = new OutputPixel(Output[i,j]);
+			}
+		}
+		OutputHistory.Push(copiedArray);
+		RandomStateHistory.Push(Random.state);
+	}
+	
+	public void Rollback()
+	{
+		AutoCollapseButton.Disable();
+		if (OutputHistory.Count > 0)
+		{
+			Output = OutputHistory.Pop();
+			RefreshOutputTexture();
+			MeshController.RefreshFromMaterialTexture();
+		}
+
+		if (RandomStateHistory.Count > 0)
+		{
+			Random.state = RandomStateHistory.Pop();
 		}
 	}
 
