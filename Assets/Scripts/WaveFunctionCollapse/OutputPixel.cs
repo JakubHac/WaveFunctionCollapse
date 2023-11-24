@@ -8,17 +8,21 @@ public class OutputPixel
 {
 	public bool IsCollapsed = false;
 	private Color Color;
-	private ElementWrapper[] PossibleElements;
+	public ElementWrapper[] PossibleElements;
 	public Vector2Int Position;
-	private List<Color> PossibleColors;
+	public List<Color> PossibleColors;
 
 	public OutputPixel(OutputPixel other)
 	{
 		IsCollapsed = other.IsCollapsed;
 		Color = other.Color;
-		PossibleElements = other.PossibleElements;
+		PossibleElements = new ElementWrapper[other.PossibleElements.Length];
+		for (int i = 0; i < other.PossibleElements.Length; i++)
+		{
+			PossibleElements[i] = other.PossibleElements[i];
+		}
 		Position = other.Position;
-		PossibleColors = other.PossibleColors;
+		PossibleColors = new List<Color>(other.PossibleColors);
 	}
 	
 	public OutputPixel(ElementWrapper[] elements, Vector2Int position, Color? firstColor)
@@ -36,11 +40,6 @@ public class OutputPixel
 
 	public bool Collapse(Color color, bool snapshot)
 	{
-		// if (snapshot)
-		// {
-		// 	WFC.TakeSnapshot();
-		// }
-
 		bool result = true;
 		
 		if (!PossibleElements.Any(x => x.MiddleColor.Equals(color)))
@@ -58,11 +57,6 @@ public class OutputPixel
 
 	public bool Collapse(bool snapshot)
 	{
-		// if (snapshot)
-		// {
-		// 	WFC.TakeSnapshot();
-		// }
-		
 		IsCollapsed = true;
 		Dictionary<ElementWrapper, int> elementsPossibilities = new();
 		int sum = 0;
@@ -182,11 +176,11 @@ public class OutputPixel
 
 			foreach (var neighbor in neighbors)
 			{
-				var testPixel = element.GetPixelFromCenter(neighbor.Position.x - Position.x, neighbor.Position.y - Position.y);
+				var ourPossibleElementPixel = element.GetPixelFromCenter(neighbor.Position.x - Position.x, neighbor.Position.y - Position.y);
 				bool matches = false;
-				foreach (var color in neighbor.PossibleColors)
+				foreach (var neighborPixel in neighbor.PossibleColors)
 				{
-					if (color.Equals(testPixel))
+					if (neighborPixel.Equals(ourPossibleElementPixel))
 					{
 						matches = true;
 						break;

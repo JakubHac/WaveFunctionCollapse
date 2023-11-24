@@ -25,6 +25,11 @@ public class WFC : MonoBehaviour
 	public static int AllElementsCount;
 	private static WFC _instance;
 	static List<IOperation> Operations = new ();
+	
+	private static int backtracks = 1;
+	private const int maxBacktracks = 100;
+	private static int successes = 0;
+	private const int successesToReduceBacktrack = 10;
 
 	public static List<OutputPixel> GetNeighbors(Vector2Int center)
 	{
@@ -66,16 +71,17 @@ public class WFC : MonoBehaviour
 
 	public void StartAlogrithm(Dictionary<ElementWrapper, int> elements)
 	{
-		Random.InitState(1234567890);
+		//Random.InitState(1234567890);
+		PreservedGround = false;
 		AutoCollapseButton.Disable();
 		SetupOutput(elements);
+		TakeSnapshot();
 		RefreshOutputTexture();
 		MeshController.SetupMeshFromTexture();
 	}
 
 	public void NextStep()
 	{
-		TakeSnapshot();
 		Debug.Log($"Next step, R: {Random.state.GetHashCode()}");
 		if (!PreservedGround && Setup.Ground)
 		{
@@ -87,6 +93,8 @@ public class WFC : MonoBehaviour
 			CollapseMostCertain();
 		}
 
+		bool success = true;
+
 		while (Operations.Count > 0)
 		{
 			var operation = Operations[0];
@@ -94,8 +102,34 @@ public class WFC : MonoBehaviour
 			if (!operation.Execute())
 			{
 				Debug.LogError($"operation {operation.DebugIdentifier()} failed");
+				Backtrack();
+				success = false;
+				if (backtracks < maxBacktracks)
+				{
+					backtracks++;
+				}
+				
+				//AutoCollapseButton.Disable();
 				break;
 			}
+		}
+
+		if (success)
+		{
+			TakeSnapshot();
+			successes++;
+			if (successes >= successesToReduceBacktrack)
+			{
+				successes = 0;
+				if (backtracks > 1)
+				{
+					backtracks--;
+				}
+			}
+		}
+		else
+		{
+			successes = 0;
 		}
 		
 		RefreshOutputTexture();
@@ -210,6 +244,7 @@ public class WFC : MonoBehaviour
 		
 		OutputHistory.Clear();
 		RandomStateHistory.Clear();
+		Resources.UnloadUnusedAssets();
 	}
 
 	public static void TakeSnapshot()
@@ -221,11 +256,50 @@ public class WFC : MonoBehaviour
 		{
 			for (int j = 0; j < cols; j++)
 			{
+				OutputPixel pixel = Output[i, j];
+				if (pixel.PossibleColors.Count == 0 && !pixel.IsCollapsed)
+				{
+					Debug.Log("Not taking a snapshot of a corrupted state");
+					return;
+				}
 				copiedArray[i, j] = new OutputPixel(Output[i,j]);
 			}
 		}
 		OutputHistory.Push(copiedArray);
 		RandomStateHistory.Push(Random.state);
+	}
+
+	public void Backtrack()
+	{
+		//AutoCollapseButton.Disable();
+		for (int i = 0; i < backtracks; i++)
+		{
+			if (OutputHistory.Count > 2)
+			{
+				Output = OutputHistory.Pop();
+				int rows = Output.GetLength(0);
+				int cols = Output.GetLength(1);
+				for (int x = 0; x < rows; x++)
+				{
+					for (int y = 0; y < cols; y++)
+					{
+						OutputPixel pixel = Output[x, y];
+						if (pixel.PossibleElements.Length == 0 && !pixel.IsCollapsed)
+						{
+							Debug.LogError("Corrupted state in rollback");
+						}
+					}
+				}
+
+				RefreshOutputTexture();
+				MeshController.RefreshFromMaterialTexture();
+			}
+
+			if (RandomStateHistory.Count > 2)
+			{
+				RandomStateHistory.Pop();
+			}
+		}
 	}
 	
 	public void Rollback()
