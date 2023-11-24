@@ -4,7 +4,7 @@ using UnityEngine;
 
 public interface IOperation
 {
-	public string GetUIText();
-	public void Execute();
+	public string DebugIdentifier();
+	public bool Execute();
 }
 

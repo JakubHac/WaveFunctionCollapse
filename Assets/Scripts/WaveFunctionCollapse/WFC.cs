@@ -26,22 +26,6 @@ public class WFC : MonoBehaviour
 	private static WFC _instance;
 	static List<IOperation> Operations = new ();
 
-	private void Start()
-	{
-		var state = Random.state;
-
-		for (int i = 0; i < 5; i++)
-		{
-			Debug.Log(Random.value);
-		}
-		Random.state = state;
-		
-		for (int i = 0; i < 5; i++)
-		{
-			Debug.Log(Random.value);
-		}
-	}
-
 	public static List<OutputPixel> GetNeighbors(Vector2Int center)
 	{
 		List<OutputPixel> neighbors = new List<OutputPixel>();
@@ -107,7 +91,11 @@ public class WFC : MonoBehaviour
 		{
 			var operation = Operations[0];
 			Operations = Operations.Skip(1).ToList();
-			operation.Execute();
+			if (!operation.Execute())
+			{
+				Debug.LogError($"operation {operation.DebugIdentifier()} failed");
+				break;
+			}
 		}
 		
 		RefreshOutputTexture();

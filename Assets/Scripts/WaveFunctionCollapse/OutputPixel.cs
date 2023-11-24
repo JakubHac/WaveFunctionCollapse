@@ -34,26 +34,29 @@ public class OutputPixel
 		}
 	}
 
-	public void Collapse(Color color, bool snapshot)
+	public bool Collapse(Color color, bool snapshot)
 	{
 		// if (snapshot)
 		// {
 		// 	WFC.TakeSnapshot();
 		// }
-		
+
+		bool result = true;
 		
 		if (!PossibleElements.Any(x => x.MiddleColor.Equals(color)))
 		{
 			Debug.LogError("How are we getting a color that isn't in the list of possible elements?");
+			result = false;
 		}
 
 		IsCollapsed = true;
 		Color = color;
 		PossibleElements = Array.Empty<ElementWrapper>();
 		PossibleColors = new List<Color>() { color };
+		return result;
 	}
 
-	public void Collapse(bool snapshot)
+	public bool Collapse(bool snapshot)
 	{
 		// if (snapshot)
 		// {
@@ -85,6 +88,8 @@ public class OutputPixel
 
 		PossibleElements = Array.Empty<ElementWrapper>();
 		PossibleColors = new List<Color>() { Color };
+
+		return true;
 	}
 
 	public Color GetColor()
@@ -136,10 +141,11 @@ public class OutputPixel
 	/// 
 	/// </summary>
 	/// <returns>true if possible colors changed</returns>
-	public bool RefreshPossibilites()
+	public bool RefreshPossibilites(out bool success)
 	{
 		if (IsCollapsed)
 		{
+			success = true;
 			return false;
 		}
 
@@ -149,9 +155,12 @@ public class OutputPixel
 		if (PossibleColors.Count == 0)
 		{
 			Debug.LogError($"No possible colors after refresh! {Position}");
+			success = false;
 			return possibleColorsBefore != 0;
 		}
 
+		success = true;
+		
 		if (PossibleColors.Count == 1)
 		{
 			Collapse(PossibleColors[0], true);

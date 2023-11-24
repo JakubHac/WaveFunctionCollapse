@@ -9,6 +9,7 @@ public class PresetSO : ScriptableObject
     public bool Ground = true;
     public bool Rotate = true;
     public Texture2D InputTexture;
+    public EmptyBehaviour EmptyBehaviour = EmptyBehaviour.EmptyMatchOutside;
 
     public WFCSetup GetSetup()
     {
@@ -19,7 +20,8 @@ public class PresetSO : ScriptableObject
             OutputHeight = OutputHeight, 
             Ground = Ground,
             Rotate = Rotate,
-            InputTexture = InputTexture
+            InputTexture = InputTexture,
+            EmptyBehaviour = EmptyBehaviour
         };
     }
 }

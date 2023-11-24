@@ -11,18 +11,16 @@ public class Collapse : IOperation
         Color = color;
     }
 
-    public string GetUIText() => "Zapadnięcie";
+    public string DebugIdentifier() => $"Collapse at Position: {Position} ({(Color == null ? "without color" : $"with color {ColorUtility.ToHtmlStringRGBA(Color.Value)}")})";
 
-    public void Execute()
+    public bool Execute()
     {
         var outputPixel = WFC.Output[(int)Position.x, (int)Position.y];
         if (Color != null)
         {
-            outputPixel.Collapse(Color.Value, true);
+            return outputPixel.Collapse(Color.Value, true);
         }
-        else
-        {
-            outputPixel.Collapse(true);
-        }
+        
+        return outputPixel.Collapse(true);
     }
 }

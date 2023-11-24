@@ -16,4 +16,6 @@ MonoBehaviour:
   OutputWidth: 64
   OutputHeight: 64
   Ground: 0
+  Rotate: 1
   InputTexture: {fileID: 2800000, guid: bb4786914a9736944b37106eba2473c7, type: 3}
+  EmptyBehaviour: 2

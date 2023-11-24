@@ -30,8 +30,8 @@ public class ElementCounter : MonoBehaviour
 	public void Setup(WFCSetup setup)
 	{
 		OrigTexture = setup.InputTexture;
-		X = Mathf.FloorToInt(setup.KernelSize / 2f);
-		Y = OrigTexture.height - Mathf.CeilToInt(setup.KernelSize / 2f);
+		X = 0;
+		Y = OrigTexture.height - 1;
 		kernelSize = setup.KernelSize;
 		
 		Clear();
@@ -111,40 +111,32 @@ public class ElementCounter : MonoBehaviour
 
 	public bool NeedsToGoToNextRow()
 	{
-		return X >= OrigTexture.width - kernelSize + 1;
+		return X >= OrigTexture.width - 1;
 	}
 
 	public bool CanCount()
 	{
-		return Y >= Mathf.FloorToInt(kernelSize / 2f);
+		return Y >= 0;
 	}
 
 	public void CountNext()
 	{
 		if (!CanCount()) return;
 
-		Texture2D textureElement = Texture2DExtensions.CreatePixelTexture(kernelSize, kernelSize);
-		textureElement.SetPixels(
-			OrigTexture.GetPixels(
-			X - Mathf.FloorToInt(kernelSize / 2f), 
-			Y - Mathf.FloorToInt(kernelSize / 2f), 
-			kernelSize, 
-			kernelSize
-		));
-		textureElement.Apply();
+		var textureFragment = GetTextureFragment();
 
-		var elementWrapper = new ElementWrapper(textureElement);
+		var elementWrapper = new ElementWrapper(textureFragment);
 
 		if (Counts.ContainsKey(elementWrapper))
 		{
 			Counts[elementWrapper].Increment();
 			//we can destroy this instance, we dont need to waste momory on duplicates
-			DestroyImmediate(textureElement, true);
+			DestroyImmediate(textureFragment, true);
 		}
 		else
 		{
 			var counter = Instantiate(CounterPrefab, CounterParent).GetComponent<Counter>();;
-			counter.Set(textureElement, 1);
+			counter.Set(textureFragment, 1);
 			Counts.Add(elementWrapper, counter);
 		}
 
@@ -152,7 +144,7 @@ public class ElementCounter : MonoBehaviour
 
 		if (NeedsToGoToNextRow())
 		{
-			X = Mathf.FloorToInt(kernelSize / 2f);
+			X = 0;
 			Y--;
 		}
 		else
@@ -161,6 +153,63 @@ public class ElementCounter : MonoBehaviour
 		}
 		
 		RefreshKernelOutline();
+	}
+
+	private Texture2D GetTextureFragment()
+	{
+		Texture2D textureFragment = Texture2DExtensions.CreatePixelTexture(kernelSize, kernelSize, TextureFormat.RGBA32);
+		if (IsFragmentOutsideOfTexture(X,Y))
+		{
+			var halfKernelSize = Mathf.FloorToInt(kernelSize / 2f);
+			Color[] pixels = new Color[kernelSize * kernelSize];
+			int index = 0;
+			for (int y = -halfKernelSize; y <= halfKernelSize; y++)
+			for (int x = -halfKernelSize; x <= halfKernelSize; x++)
+			{
+				if (IsPointOutsideOfTexture(X + x, Y + y))
+				{
+					pixels[index] = new Color(0f, 0f, 0f, 0f);
+				}
+				else
+				{
+					var pixel = OrigTexture.GetPixel(X + x, Y + y);
+					pixel.a = 1f;
+					pixels[index] = pixel;
+				}
+				index++;
+			}
+			textureFragment.SetPixels(pixels);
+		}
+		else
+		{
+			var pixels = OrigTexture.GetPixels(
+				X - Mathf.FloorToInt(kernelSize / 2f),
+				Y - Mathf.FloorToInt(kernelSize / 2f),
+				kernelSize,
+				kernelSize
+			);
+
+			for (int i = 0; i < pixels.Length; i++)
+			{
+				pixels[i].a = 1f;
+			}
+			
+			textureFragment.SetPixels(pixels);
+		}
+
+		textureFragment.Apply();
+		return textureFragment;
+	}
+
+	private bool IsFragmentOutsideOfTexture(int x, int y)
+	{
+		return x - Mathf.FloorToInt(kernelSize / 2f) < 0 || X + Mathf.FloorToInt(kernelSize / 2f) >= OrigTexture.width ||
+		       y - Mathf.FloorToInt(kernelSize / 2f) < 0 || Y + Mathf.FloorToInt(kernelSize / 2f) >= OrigTexture.height;
+	}
+	
+	private bool IsPointOutsideOfTexture(int x, int y)
+	{
+		return x < 0 || x >= OrigTexture.width || y < 0 || y >= OrigTexture.height;
 	}
 
 	public void MoveDataToRotator()

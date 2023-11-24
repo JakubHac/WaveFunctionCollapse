@@ -11,9 +11,9 @@ public class Propagation : IOperation
 		Position = position;
 	}
 
-	public string GetUIText() => "Propagacja";
+	public string DebugIdentifier() => $"Propagation at {Position}";
 	
-	public void Execute()
+	public bool Execute()
 	{
 		var start = WFC.Output[(int)Position.x, (int)Position.y];
 		var alreadyVisited = new HashSet<Vector2Int>(){start.Position};
@@ -32,7 +32,8 @@ public class Propagation : IOperation
 				continue;
 			}
 			alreadyVisited.Add(currentPosition);
-			if (current.RefreshPossibilites())
+			bool success = true;
+			if (current.RefreshPossibilites(out success))
 			{
 				foreach (var neighbor in WFC.GetNeighbors(currentPosition))
 				{
@@ -42,6 +43,13 @@ public class Propagation : IOperation
 					}
 				}
 			}
+
+			if (!success)
+			{
+				return false;
+			}
 		}
+
+		return true;
 	}
 }
