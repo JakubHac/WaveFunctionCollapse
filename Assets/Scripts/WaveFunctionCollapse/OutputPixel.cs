@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-public class OutputPixel
+public class OutputPixel : IDisposable
 {
 	public bool IsCollapsed = false;
 	private Color Color;
@@ -207,6 +207,18 @@ public class OutputPixel
 			{
 				PossibleColors.Add(wrapper.MiddleColor);
 			}
+		}
+	}
+
+	public void Dispose()
+	{
+		if (PossibleElements != null)
+		{
+			foreach (ElementWrapper element in PossibleElements)
+			{
+				element.Dispose();
+			}
+			PossibleElements = null;
 		}
 	}
 }

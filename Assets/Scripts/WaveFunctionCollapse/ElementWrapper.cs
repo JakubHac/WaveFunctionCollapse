@@ -2,10 +2,11 @@ using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
-public class ElementWrapper : IEquatable<ElementWrapper>
+public class ElementWrapper : IEquatable<ElementWrapper>, IDisposable
 {
-    public readonly Texture2D Texture;
+    public Texture2D Texture { get; private set; }
     public readonly Color MiddleColor;
     private int? _hashCode;
     private Color[,] PixelsFromCenter;
@@ -76,4 +77,13 @@ public class ElementWrapper : IEquatable<ElementWrapper>
     }
 
     public Color GetPixelFromCenter(Vector2Int neighborOffset) => GetPixelFromCenter(neighborOffset.x, neighborOffset.y);
+
+    public void Dispose()
+    {
+        if (Texture != null)
+        {
+            Object.DestroyImmediate(Texture, true);
+            Texture = null;
+        }
+    }
 }

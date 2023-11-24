@@ -12,7 +12,6 @@ public class WFC : MonoBehaviour
 	[SerializeField] private OutputMeshController MeshController;
 	[SerializeField] private AutomaticButton AutoCollapseButton;
 	
-	
 	public static Stack<OutputPixel[,]> OutputHistory = new Stack<OutputPixel[,]>();
 	public static Stack<Random.State> RandomStateHistory = new Stack<Random.State>();
 	
@@ -27,9 +26,15 @@ public class WFC : MonoBehaviour
 	static List<IOperation> Operations = new ();
 	
 	private static int backtracks = 1;
-	private const int maxBacktracks = 100;
+	private const int maxBacktracks = 10;
 	private static int successes = 0;
-	private const int successesToReduceBacktrack = 10;
+	private const int successesToReduceBacktrack = 3;
+
+	private void OnDestroy()
+	{
+		ClearState(Output);
+		ClearHistory();
+	}
 
 	public static List<OutputPixel> GetNeighbors(Vector2Int center)
 	{
@@ -204,6 +209,12 @@ public class WFC : MonoBehaviour
 	private void SetupOutput(Dictionary<ElementWrapper, int> elements)
 	{
 		Elements = elements;
+		if (Output != null)
+		{
+			ClearState(Output);
+			Output = null;
+		}
+		
 		Output = new OutputPixel[Setup.OutputWidth, Setup.OutputHeight];
 		AllElementsCount = elements.Count;
 		ColorsElements.Clear();
@@ -234,17 +245,39 @@ public class WFC : MonoBehaviour
 				break;
 			}
 		}
-
 		
 		for (int x = 0; x < Setup.OutputWidth; x++)
 		for (int y = 0; y < Setup.OutputHeight; y++)
 		{
 			Output[x, y] = new OutputPixel(distinctElementWrappers, new Vector2Int(x,y), firstColor);
 		}
-		
+
+		ClearHistory();
+	}
+
+	private static void ClearHistory()
+	{
+		while (OutputHistory.Count > 0)
+		{
+			var historyState = OutputHistory.Pop();
+			ClearState(historyState);
+		}
+
 		OutputHistory.Clear();
 		RandomStateHistory.Clear();
 		Resources.UnloadUnusedAssets();
+	}
+
+	private static void ClearState(OutputPixel[,] historyState)
+	{
+		int rows = historyState.GetLength(0);
+		int cols = historyState.GetLength(1);
+		for (int x = 0; x < rows; x++)
+		for (int y = 0; y < cols; y++)
+		{
+			var pixel = historyState[x, y];
+			pixel.Dispose();
+		}
 	}
 
 	public static void TakeSnapshot()
@@ -274,7 +307,7 @@ public class WFC : MonoBehaviour
 		//AutoCollapseButton.Disable();
 		for (int i = 0; i < backtracks; i++)
 		{
-			if (OutputHistory.Count > 2)
+			if (OutputHistory.Count > 1)
 			{
 				Output = OutputHistory.Pop();
 				int rows = Output.GetLength(0);
@@ -295,7 +328,7 @@ public class WFC : MonoBehaviour
 				MeshController.RefreshFromMaterialTexture();
 			}
 
-			if (RandomStateHistory.Count > 2)
+			if (RandomStateHistory.Count > 1)
 			{
 				RandomStateHistory.Pop();
 			}
