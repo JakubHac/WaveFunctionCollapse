@@ -3,15 +3,15 @@ using UnityEngine;
 public class Collapse : IOperation
 {
     public Vector2Int Position;
-    public Color? Color;
+    public int? Color;
 
-    public Collapse(Vector2Int position, Color? color = null)
+    public Collapse(Vector2Int position, int? color = null)
     {
         Position = position;
         Color = color;
     }
 
-    public string DebugIdentifier() => $"Collapse at Position: {Position} ({(Color == null ? "without color" : $"with color {ColorUtility.ToHtmlStringRGBA(Color.Value)}")})";
+    public string DebugIdentifier() => $"Collapse at Position: {Position} ({(Color == null ? "without color" : $"with color {ColorUtility.ToHtmlStringRGBA(ColorManager.GetColor(Color.Value))}")})";
 
     public bool Execute()
     {

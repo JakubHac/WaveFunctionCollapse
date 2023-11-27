@@ -20,9 +20,9 @@ public class WFC : MonoBehaviour
 	public static Dictionary<ElementWrapper, int> Elements;
 	public static OutputPixel[,] Output;
 	Texture2D OutputTexture;
-	public static Dictionary<Color, List<ElementWrapper>> ColorsElements = new();
-	private static ElementWrapper[] StartingElements;
-	private static readonly IReadOnlyList<ElementWrapper> EmptyElementWrappers = new ElementWrapper[0];
+	public static Dictionary<int, List<ElementWrapper>> ColorsElements = new();
+	public static ElementWrapper[] AllPossibleElements;
+	//private static readonly IReadOnlyList<ElementWrapper> EmptyElementWrappers = new ElementWrapper[0];
 	public static int AllElementsCount;
 	private static WFC _instance;
 	static List<IOperation> Operations = new ();
@@ -31,6 +31,12 @@ public class WFC : MonoBehaviour
 	private const int maxBacktracks = 10;
 	private static int successes = 0;
 	private const int successesToReduceBacktrack = 3;
+	
+	private static int historyCompact = 1;
+	private const int maxHistorySizeBeforeCompact = 50;
+	private const int historyCompactSize = 30;
+	private static int historySizeWithoutCompact => OutputHistory?.Count - historyCompact ?? 0;
+	private static bool shouldCompactHistory => historySizeWithoutCompact > maxHistorySizeBeforeCompact;
 
 	private void OnDestroy()
 	{
@@ -78,7 +84,11 @@ public class WFC : MonoBehaviour
 
 	public void StartAlogrithm(Dictionary<ElementWrapper, int> elements)
 	{
-		
+		var camera = FindObjectOfType<OrbitCameraController>();
+		if (camera != null)
+		{
+			camera.ResetCameraPosition();
+		}
 		//Random.InitState(1234567890);
 		PreservedGround = false;
 		AutoCollapseButton.Disable();
@@ -151,8 +161,7 @@ public class WFC : MonoBehaviour
 		var orderedByUncertainty = Output.Cast<OutputPixel>().Where(x => !x.IsCollapsed).OrderBy(x => x.GetUncertainty()).ToList();
 		if (orderedByUncertainty.Count == 0)
 		{
-			AutoCollapseButton.Disable();
-			Debug.Log("WFC finished");
+			OnWFCFinished();
 			return;
 		}
 		var treshold = orderedByUncertainty[0].GetUncertainty();
@@ -173,6 +182,15 @@ public class WFC : MonoBehaviour
 		
 		Operations.Add(new Collapse(possiblePixels[randomIndex].Position));
 		Operations.Add(new Propagation(possiblePixels[randomIndex].Position));
+	}
+
+	private void OnWFCFinished()
+	{
+		AutoCollapseButton.Disable();
+		Debug.Log("WFC finished");
+		AllPossibleElements = null;
+		ClearState(Output);
+		ClearHistory();
 	}
 
 	private void RefreshOutputTexture()
@@ -236,18 +254,23 @@ public class WFC : MonoBehaviour
 			}
 		}
 		
-		StartingElements = Elements.Keys.ToHashSet().ToArray();
-
-		Color? firstColor = null;
-		foreach (var wrapper in StartingElements)
+		AllPossibleElements = Elements.Keys.ToHashSet().ToArray();
+		
+		foreach (var element in AllPossibleElements)
 		{
-			if (firstColor == null)
+			element.ClearTexture();
+		}
+
+		int? forcedColor = null;
+		foreach (var wrapper in AllPossibleElements)
+		{
+			if (forcedColor == null)
 			{
-				firstColor = wrapper.MiddleColor;
+				forcedColor = wrapper.MiddleColor;
 			}
-			else if (!firstColor.Equals(wrapper.MiddleColor))
+			else if (forcedColor != wrapper.MiddleColor)
 			{
-				firstColor = null;
+				forcedColor = null;
 				break;
 			}
 		}
@@ -255,7 +278,7 @@ public class WFC : MonoBehaviour
 		for (int x = 0; x < Setup.OutputWidth; x++)
 		for (int y = 0; y < Setup.OutputHeight; y++)
 		{
-			Output[x, y] = new OutputPixel(StartingElements, new Vector2Int(x,y), firstColor);
+			Output[x, y] = new OutputPixel(Enumerable.Range(0, AllPossibleElements.Length).ToArray(), new Vector2Int(x,y), forcedColor);
 		}
 
 		ClearHistory();
@@ -269,9 +292,11 @@ public class WFC : MonoBehaviour
 			ClearState(historyState);
 		}
 
+		historyCompact = 1;
 		OutputHistory.Clear();
 		RandomStateHistory.Clear();
 		Resources.UnloadUnusedAssets();
+		GC.Collect(2, GCCollectionMode.Forced, true, true);
 	}
 
 	private static void ClearState(OutputPixel[,] historyState)
@@ -305,18 +330,37 @@ public class WFC : MonoBehaviour
 					Debug.Log("Not taking a snapshot of a corrupted state");
 					return;
 				}
-				if (ReferenceEquals(pixel.PossibleElements,StartingElements))
-				{
-					copiedArray[i, j] = new OutputPixel(Output[i,j], EmptyElementWrappers);
-				}
-				else
-				{
+				// if (ReferenceEquals(pixel.PossibleElements,AllPossibleElements))
+				// {
+				// 	copiedArray[i, j] = new OutputPixel(Output[i,j],  Enumerable.Range(0,EmptyElementWrappers.Count).ToArray());
+				// }
+				// else
+				// {
 					copiedArray[i, j] = new OutputPixel(Output[i,j]);
-				}
+				//}
 			}
 		}
 		OutputHistory.Push(copiedArray);
 		RandomStateHistory.Push(Random.state);
+
+		if (shouldCompactHistory)
+		{
+			CompactHistory();
+		}
+	}
+
+	private static void CompactHistory()
+	{
+		Debug.Log("Compact history");
+		var history = OutputHistory.ToList();
+		var randomStates = RandomStateHistory.ToList();
+		OutputHistory = new Stack<OutputPixel[,]>(history.Take(historyCompact).Skip(historyCompactSize));
+		RandomStateHistory = new Stack<Random.State>(randomStates.Take(historyCompact).Skip(historyCompactSize));
+		historyCompact++;
+		history = null;
+		randomStates = null;
+		Resources.UnloadUnusedAssets();
+		GC.Collect(1, GCCollectionMode.Optimized, false, false);
 	}
 
 	public void Backtrack()
@@ -328,20 +372,7 @@ public class WFC : MonoBehaviour
 			{
 				//Output = OutputHistory.Pop();
 				RollbackOutputFromHistory();
-				int rows = Output.GetLength(0);
-				int cols = Output.GetLength(1);
-				for (int x = 0; x < rows; x++)
-				{
-					for (int y = 0; y < cols; y++)
-					{
-						OutputPixel pixel = Output[x, y];
-						if (pixel.PossibleElements.Count == 0 && !pixel.IsCollapsed)
-						{
-							Debug.LogError("Corrupted state in rollback");
-						}
-					}
-				}
-
+				ValidateState();
 				RefreshOutputTexture();
 				MeshController.RefreshFromMaterialTexture();
 			}
@@ -350,9 +381,34 @@ public class WFC : MonoBehaviour
 			{
 				RandomStateHistory.Pop();
 			}
+
+			if (OutputHistory.Count > historyCompact)
+			{
+				historyCompact = OutputHistory.Count;
+			}
+			
+			OutputHistory.TrimExcess();
+			RandomStateHistory.TrimExcess();
 		}
 	}
-	
+
+	private static void ValidateState()
+	{
+		int rows = Output.GetLength(0);
+		int cols = Output.GetLength(1);
+		for (int x = 0; x < rows; x++)
+		{
+			for (int y = 0; y < cols; y++)
+			{
+				OutputPixel pixel = Output[x, y];
+				if (pixel.PossibleElements.Count == 0 && !pixel.IsCollapsed)
+				{
+					Debug.LogError("Corrupted state");
+				}
+			}
+		}
+	}
+
 	public void Rollback()
 	{
 		AutoCollapseButton.Disable();
@@ -368,6 +424,11 @@ public class WFC : MonoBehaviour
 		{
 			Random.state = RandomStateHistory.Pop();
 		}
+		
+		if (OutputHistory.Count > historyCompact)
+		{
+			historyCompact = OutputHistory.Count;
+		}
 	}
 
 	private static void RollbackOutputFromHistory()
@@ -380,10 +441,10 @@ public class WFC : MonoBehaviour
 			for (int y = 0; y < cols; y++)
 			{
 				OutputPixel pixel = state[x, y];
-				if (ReferenceEquals(pixel.PossibleElements, EmptyElementWrappers))
-				{
-					pixel.PossibleElements = StartingElements;
-				}
+				// if (ReferenceEquals(pixel.PossibleElements, EmptyElementWrappers))
+				// {
+					pixel.PossibleElements = Enumerable.Range(0, AllPossibleElements.Length).ToArray();
+				//}
 			}
 		}
 		Output = state;
@@ -396,7 +457,7 @@ public class WFC : MonoBehaviour
 		for (int x = 0; x < Setup.OutputWidth; x++)
 		{
 			Vector2Int position = new Vector2Int(x, lastY);
-			IOperation collapse = new Collapse( position, Setup.InputTexture.GetPixel(x, 0));
+			IOperation collapse = new Collapse( position, ColorManager.GetColor(Setup.InputTexture.GetPixel(x, 0)));
 			IOperation propagation = new Propagation(position);
 			Operations.Add(collapse);
 			Operations.Add(propagation);

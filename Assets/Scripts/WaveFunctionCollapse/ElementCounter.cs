@@ -29,6 +29,7 @@ public class ElementCounter : MonoBehaviour
 
 	public void Setup(WFCSetup setup)
 	{
+		ColorManager.ClearColors();
 		OrigTexture = setup.InputTexture;
 		X = 0;
 		Y = OrigTexture.height - 1;

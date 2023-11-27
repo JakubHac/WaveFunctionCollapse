@@ -7,18 +7,18 @@ using Random = UnityEngine.Random;
 public class OutputPixel : IDisposable
 {
 	public bool IsCollapsed = false;
-	private Color Color;
-	public IReadOnlyList<ElementWrapper> PossibleElements;
+	private int Color;
+	public IReadOnlyList<int> PossibleElements;
 	public Vector2Int Position;
-	public List<Color> PossibleColors;
+	public List<int> PossibleColors;
 
-	public OutputPixel(OutputPixel other, IReadOnlyList<ElementWrapper> possibleElementsOverride = null)
+	public OutputPixel(OutputPixel other, IReadOnlyList<int> possibleElementsOverride = null)
 	{
 		IsCollapsed = other.IsCollapsed;
 		Color = other.Color;
 		if (possibleElementsOverride == null)
 		{
-			var clone = new ElementWrapper[other.PossibleElements.Count];
+			var clone = new int[other.PossibleElements.Count];
 			for (int i = 0; i < other.PossibleElements.Count; i++)
 			{
 				clone[i] = other.PossibleElements[i];
@@ -30,13 +30,13 @@ public class OutputPixel : IDisposable
 			PossibleElements = possibleElementsOverride;
 		}
 		Position = other.Position;
-		PossibleColors = new List<Color>(other.PossibleColors);
+		PossibleColors = new List<int>(other.PossibleColors);
 	}
 	
-	public OutputPixel(ElementWrapper[] elements, Vector2Int position, Color? firstColor)
+	public OutputPixel(int[] elements, Vector2Int position, int? firstColor)
 	{
 		PossibleElements = elements;
-		PossibleColors = elements.Select(x => x.MiddleColor).Distinct().ToList();
+		PossibleColors = elements.Select(x => WFC.AllPossibleElements[x].MiddleColor).Distinct().ToList();
 		Position = position;
 
 		if (firstColor != null)
@@ -46,11 +46,11 @@ public class OutputPixel : IDisposable
 		}
 	}
 
-	public bool Collapse(Color color, bool snapshot)
+	public bool Collapse(int color, bool snapshot)
 	{
 		bool result = true;
 		
-		if (!PossibleElements.Any(x => x.MiddleColor.Equals(color)))
+		if (!PossibleElements.Any(x => WFC.AllPossibleElements[x].MiddleColor.Equals(color)))
 		{
 			Debug.LogError("How are we getting a color that isn't in the list of possible elements?");
 			result = false;
@@ -58,8 +58,8 @@ public class OutputPixel : IDisposable
 
 		IsCollapsed = true;
 		Color = color;
-		PossibleElements = Array.Empty<ElementWrapper>();
-		PossibleColors = new List<Color>() { color };
+		PossibleElements = Array.Empty<int>();
+		PossibleColors = new List<int>() { Color };
 		return result;
 	}
 
@@ -70,7 +70,7 @@ public class OutputPixel : IDisposable
 		int sum = 0;
 		for (int i = 0; i < PossibleElements.Count; i++)
 		{
-			var element = PossibleElements[i];
+			var element = WFC.AllPossibleElements[PossibleElements[i]];
 			int elementWeight = WFC.Elements[element];
 			sum += elementWeight;
 			elementsPossibilities.Add(element, elementWeight);
@@ -88,8 +88,8 @@ public class OutputPixel : IDisposable
 			}
 		}
 
-		PossibleElements = Array.Empty<ElementWrapper>();
-		PossibleColors = new List<Color>() { Color };
+		PossibleElements = Array.Empty<int>();
+		PossibleColors = new List<int>() { Color };
 
 		return true;
 	}
@@ -98,12 +98,12 @@ public class OutputPixel : IDisposable
 	{
 		if (IsCollapsed)
 		{
-			return Color;
+			return ColorManager.GetColor(Color);
 		}
 
 		if (PossibleColors.Count == 0)
 		{
-			return Color.magenta;
+			return UnityEngine.Color.magenta;
 		}
 
 		float r = 0f;
@@ -112,7 +112,7 @@ public class OutputPixel : IDisposable
 		int possibleElementsCount = PossibleElements.Count;
 		foreach (var element in PossibleElements)
 		{
-			var color = element.MiddleColor;
+			Color color = ColorManager.GetColor(WFC.AllPossibleElements[element].MiddleColor);
 			r += color.r / possibleElementsCount;
 			g += color.g / possibleElementsCount;
 			b += color.b / possibleElementsCount;
@@ -172,19 +172,19 @@ public class OutputPixel : IDisposable
 		return possibleColorsBefore != PossibleColors.Count;
 	}
 
-	private List<ElementWrapper> RefreshToBeAssigned = new List<ElementWrapper>();
+	private List<int> RefreshToBeAssigned = new List<int>();
 
 	private void Refresh()
 	{
 		var neighbors = WFC.GetNeighbors(Position);
 		RefreshToBeAssigned.Clear();
-		foreach (ElementWrapper element in PossibleElements)
+		foreach (var element in PossibleElements)
 		{
 			bool isPossible = true;
 
 			foreach (var neighbor in neighbors)
 			{
-				var ourPossibleElementPixel = element.GetPixelFromCenter(neighbor.Position.x - Position.x, neighbor.Position.y - Position.y);
+				var ourPossibleElementPixel = WFC.AllPossibleElements[element].GetPixelFromCenter(neighbor.Position.x - Position.x, neighbor.Position.y - Position.y);
 				bool matches = false;
 				foreach (var neighborPixel in neighbor.PossibleColors)
 				{
@@ -208,10 +208,13 @@ public class OutputPixel : IDisposable
 			}
 		}
 		PossibleElements = RefreshToBeAssigned.ToArray();
+		RefreshToBeAssigned.Clear();
+		RefreshToBeAssigned.TrimExcess();
 		PossibleColors.Clear();
-		foreach (var wrapper in PossibleElements)
+		foreach (var wrapperIndex in PossibleElements)
 		{
-			if (!PossibleColors.Contains<Color>(wrapper.MiddleColor))
+			var wrapper = WFC.AllPossibleElements[wrapperIndex];
+			if (!PossibleColors.Contains<int>( wrapper.MiddleColor))
 			{
 				PossibleColors.Add(wrapper.MiddleColor);
 			}
@@ -220,13 +223,7 @@ public class OutputPixel : IDisposable
 
 	public void Dispose()
 	{
-		if (PossibleElements != null)
-		{
-			foreach (ElementWrapper element in PossibleElements)
-			{
-				element.Dispose();
-			}
-			PossibleElements = null;
-		}
+		PossibleElements = null;
+		RefreshToBeAssigned = null;
 	}
 }

@@ -7,20 +7,20 @@ using Object = UnityEngine.Object;
 public class ElementWrapper : IEquatable<ElementWrapper>, IDisposable
 {
     public Texture2D Texture { get; private set; }
-    public readonly Color MiddleColor;
+    public readonly int MiddleColor;
     private int? _hashCode;
-    private Color[,] PixelsFromCenter;
+    private int[,] PixelsFromCenter;
     Vector2Int Center;
 
     public ElementWrapper(Texture2D texture)
     {
         Texture = texture;
         Center = new Vector2Int(texture.width / 2, texture.height / 2);
-        PixelsFromCenter = new Color[texture.width, texture.height];
+        PixelsFromCenter = new int[texture.width, texture.height];
         for (int x = 0; x < texture.width; x++)
         for (int y = 0; y < texture.height; y++)
         {
-            PixelsFromCenter[x, y] = texture.GetPixel(x, y);
+            PixelsFromCenter[x, y] = ColorManager.AddColor(texture.GetPixel(x, y));
         }
         MiddleColor = PixelsFromCenter[Center.x, Center.y];
         _hashCode = null;
@@ -71,12 +71,10 @@ public class ElementWrapper : IEquatable<ElementWrapper>, IDisposable
 
     public override int GetHashCode() => _hashCode ??= CalcHashCode();
     
-    public Color GetPixelFromCenter(int xOffset, int yOffset)
+    public int GetPixelFromCenter(int xOffset, int yOffset)
     {
         return PixelsFromCenter[xOffset + Center.x, yOffset + Center.y];
     }
-
-    public Color GetPixelFromCenter(Vector2Int neighborOffset) => GetPixelFromCenter(neighborOffset.x, neighborOffset.y);
 
     public void Dispose()
     {
@@ -84,6 +82,12 @@ public class ElementWrapper : IEquatable<ElementWrapper>, IDisposable
         // {
             //Object.DestroyImmediate(Texture, true);
             Texture = null;
-        //}
+            PixelsFromCenter = null;
+            //}
+    }
+
+    public void ClearTexture()
+    {
+        Texture = null;
     }
 }
