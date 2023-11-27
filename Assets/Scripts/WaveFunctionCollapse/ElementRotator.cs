@@ -144,32 +144,38 @@ public class ElementRotator : MonoBehaviour
         Output.Clear();
         InputParent.DestroyChildren<Counter>(x =>
         {
-            if (destroy)
-            {
-                x.RawImage.texture.DestroyIfNotNull();
-            }
+            // if (destroy)
+            // {
+            //     x.RawImage.texture.DestroyIfNotNull();
+            // }
         });
         OutputParent.DestroyChildren<Counter>(x =>
         {
-            if (destroy)
-            {
-                x.RawImage.texture.DestroyIfNotNull();
-            }
+            // if (destroy)
+            // {
+            //     x.RawImage.texture.DestroyIfNotNull();
+            // }
             
         });
+        Image0Deg.texture = null;
+        Image90Deg.texture = null;
+        Image180Deg.texture = null;
+        Image270Deg.texture = null;
+        
         if (destroy)
         {
-            Image0Deg.texture.DestroyIfNotNull();
-            Image90Deg.texture.DestroyIfNotNull();
-            Image180Deg.texture.DestroyIfNotNull();
-            Image270Deg.texture.DestroyIfNotNull();
+            // Image0Deg.texture.DestroyIfNotNull();
+            // Image90Deg.texture.DestroyIfNotNull();
+            // Image180Deg.texture.DestroyIfNotNull();
+            // Image270Deg.texture.DestroyIfNotNull();
+            Resources.UnloadUnusedAssets();
         }
         else
         {
-            Image0Deg.texture = null;
-            Image90Deg.texture = null;
-            Image180Deg.texture = null;
-            Image270Deg.texture = null;
+            // Image0Deg.texture = null;
+            // Image90Deg.texture = null;
+            // Image180Deg.texture = null;
+            // Image270Deg.texture = null;
         }
     }
     

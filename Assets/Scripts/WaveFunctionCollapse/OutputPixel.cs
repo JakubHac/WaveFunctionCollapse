@@ -8,18 +8,26 @@ public class OutputPixel : IDisposable
 {
 	public bool IsCollapsed = false;
 	private Color Color;
-	public ElementWrapper[] PossibleElements;
+	public IReadOnlyList<ElementWrapper> PossibleElements;
 	public Vector2Int Position;
 	public List<Color> PossibleColors;
 
-	public OutputPixel(OutputPixel other)
+	public OutputPixel(OutputPixel other, IReadOnlyList<ElementWrapper> possibleElementsOverride = null)
 	{
 		IsCollapsed = other.IsCollapsed;
 		Color = other.Color;
-		PossibleElements = new ElementWrapper[other.PossibleElements.Length];
-		for (int i = 0; i < other.PossibleElements.Length; i++)
+		if (possibleElementsOverride == null)
 		{
-			PossibleElements[i] = other.PossibleElements[i];
+			var clone = new ElementWrapper[other.PossibleElements.Count];
+			for (int i = 0; i < other.PossibleElements.Count; i++)
+			{
+				clone[i] = other.PossibleElements[i];
+			}
+			PossibleElements = clone;
+		}
+		else
+		{
+			PossibleElements = possibleElementsOverride;
 		}
 		Position = other.Position;
 		PossibleColors = new List<Color>(other.PossibleColors);
@@ -60,7 +68,7 @@ public class OutputPixel : IDisposable
 		IsCollapsed = true;
 		Dictionary<ElementWrapper, int> elementsPossibilities = new();
 		int sum = 0;
-		for (int i = 0; i < PossibleElements.Length; i++)
+		for (int i = 0; i < PossibleElements.Count; i++)
 		{
 			var element = PossibleElements[i];
 			int elementWeight = WFC.Elements[element];
@@ -101,7 +109,7 @@ public class OutputPixel : IDisposable
 		float r = 0f;
 		float g = 0f;
 		float b = 0f;
-		int possibleElementsCount = PossibleElements.Length;
+		int possibleElementsCount = PossibleElements.Count;
 		foreach (var element in PossibleElements)
 		{
 			var color = element.MiddleColor;
@@ -120,12 +128,12 @@ public class OutputPixel : IDisposable
 			return 0;
 		}
 
-		if (PossibleElements.Length < 1)
+		if (PossibleElements.Count < 1)
 		{
 			return -1;
 		}
 
-		var value = (float)PossibleElements.Length / WFC.AllElementsCount;
+		var value = (float)PossibleElements.Count / WFC.AllElementsCount;
 		var inverseLerp = Mathf.InverseLerp(1f, 1f / WFC.AllElementsCount, value);
 		var lerp = Mathf.Lerp(1f, 0f, inverseLerp);
 		return lerp;

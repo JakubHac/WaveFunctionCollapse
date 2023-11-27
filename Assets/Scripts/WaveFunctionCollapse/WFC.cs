@@ -21,6 +21,8 @@ public class WFC : MonoBehaviour
 	public static OutputPixel[,] Output;
 	Texture2D OutputTexture;
 	public static Dictionary<Color, List<ElementWrapper>> ColorsElements = new();
+	private static ElementWrapper[] StartingElements;
+	private static readonly IReadOnlyList<ElementWrapper> EmptyElementWrappers = new ElementWrapper[0];
 	public static int AllElementsCount;
 	private static WFC _instance;
 	static List<IOperation> Operations = new ();
@@ -76,6 +78,7 @@ public class WFC : MonoBehaviour
 
 	public void StartAlogrithm(Dictionary<ElementWrapper, int> elements)
 	{
+		
 		//Random.InitState(1234567890);
 		PreservedGround = false;
 		AutoCollapseButton.Disable();
@@ -83,6 +86,7 @@ public class WFC : MonoBehaviour
 		TakeSnapshot();
 		RefreshOutputTexture();
 		MeshController.SetupMeshFromTexture();
+		GC.Collect(2, GCCollectionMode.Forced, true, true);
 	}
 
 	public void NextStep()
@@ -178,7 +182,9 @@ public class WFC : MonoBehaviour
 		{
 			if (OutputTexture.width != Setup.OutputWidth || OutputTexture.height != Setup.OutputHeight)
 			{
-				DestroyImmediate(OutputTexture, true);
+				//DestroyImmediate(OutputTexture, true);
+				OutputTexture = null;
+				Resources.UnloadUnusedAssets();
 				CreateOutputTexture();
 			}
 		}
@@ -230,10 +236,10 @@ public class WFC : MonoBehaviour
 			}
 		}
 		
-		var distinctElementWrappers = Elements.Keys.ToHashSet().ToArray();
+		StartingElements = Elements.Keys.ToHashSet().ToArray();
 
 		Color? firstColor = null;
-		foreach (var wrapper in distinctElementWrappers)
+		foreach (var wrapper in StartingElements)
 		{
 			if (firstColor == null)
 			{
@@ -249,7 +255,7 @@ public class WFC : MonoBehaviour
 		for (int x = 0; x < Setup.OutputWidth; x++)
 		for (int y = 0; y < Setup.OutputHeight; y++)
 		{
-			Output[x, y] = new OutputPixel(distinctElementWrappers, new Vector2Int(x,y), firstColor);
+			Output[x, y] = new OutputPixel(StartingElements, new Vector2Int(x,y), firstColor);
 		}
 
 		ClearHistory();
@@ -295,7 +301,14 @@ public class WFC : MonoBehaviour
 					Debug.Log("Not taking a snapshot of a corrupted state");
 					return;
 				}
-				copiedArray[i, j] = new OutputPixel(Output[i,j]);
+				if (ReferenceEquals(pixel.PossibleElements,StartingElements))
+				{
+					copiedArray[i, j] = new OutputPixel(Output[i,j], EmptyElementWrappers);
+				}
+				else
+				{
+					copiedArray[i, j] = new OutputPixel(Output[i,j]);
+				}
 			}
 		}
 		OutputHistory.Push(copiedArray);
@@ -309,7 +322,8 @@ public class WFC : MonoBehaviour
 		{
 			if (OutputHistory.Count > 1)
 			{
-				Output = OutputHistory.Pop();
+				//Output = OutputHistory.Pop();
+				RollbackOutputFromHistory();
 				int rows = Output.GetLength(0);
 				int cols = Output.GetLength(1);
 				for (int x = 0; x < rows; x++)
@@ -317,7 +331,7 @@ public class WFC : MonoBehaviour
 					for (int y = 0; y < cols; y++)
 					{
 						OutputPixel pixel = Output[x, y];
-						if (pixel.PossibleElements.Length == 0 && !pixel.IsCollapsed)
+						if (pixel.PossibleElements.Count == 0 && !pixel.IsCollapsed)
 						{
 							Debug.LogError("Corrupted state in rollback");
 						}
@@ -340,7 +354,8 @@ public class WFC : MonoBehaviour
 		AutoCollapseButton.Disable();
 		if (OutputHistory.Count > 0)
 		{
-			Output = OutputHistory.Pop();
+			RollbackOutputFromHistory();
+			//Output = OutputHistory.Pop();
 			RefreshOutputTexture();
 			MeshController.RefreshFromMaterialTexture();
 		}
@@ -349,6 +364,25 @@ public class WFC : MonoBehaviour
 		{
 			Random.state = RandomStateHistory.Pop();
 		}
+	}
+
+	private static void RollbackOutputFromHistory()
+	{
+		var state = OutputHistory.Pop();
+		int rows = state.GetLength(0);
+		int cols = state.GetLength(1);
+		for (int x = 0; x < rows; x++)
+		{
+			for (int y = 0; y < cols; y++)
+			{
+				OutputPixel pixel = state[x, y];
+				if (ReferenceEquals(pixel.PossibleElements, EmptyElementWrappers))
+				{
+					pixel.PossibleElements = StartingElements;
+				}
+			}
+		}
+		Output = state;
 	}
 
 	private void PreserveGround()
@@ -360,8 +394,6 @@ public class WFC : MonoBehaviour
 			Vector2Int position = new Vector2Int(x, lastY);
 			IOperation collapse = new Collapse( position, Setup.InputTexture.GetPixel(x, 0));
 			IOperation propagation = new Propagation(position);
-			//Output[x, lastY].Collapse(Setup.InputTexture.GetPixel(x, Setup.InputTexture.height - 1));
-			//Propagate(x, lastY);
 			Operations.Add(collapse);
 			Operations.Add(propagation);
 		}

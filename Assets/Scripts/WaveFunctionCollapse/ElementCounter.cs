@@ -39,7 +39,7 @@ public class ElementCounter : MonoBehaviour
 		Preview.texture = OrigTexture;
 		Preview.FitInParent();
 
-		AutomaticButton.AutomaticDelay = 2f / ((OrigTexture.width - 2) * (OrigTexture.height - 2));
+		AutomaticButton.AutomaticDelay = 1f / ((OrigTexture.width) * (OrigTexture.height));
 
 		LayoutRebuilder.ForceRebuildLayoutImmediate(Preview.rectTransform.parent as RectTransform);
 		RefreshKernelOutline();
@@ -48,9 +48,14 @@ public class ElementCounter : MonoBehaviour
 	public void Clear()
 	{
 		Counts.Clear();
-		CounterParent.DestroyChildren<Counter>(x => x.RawImage.texture.DestroyIfNotNull());
+		CounterParent.DestroyChildren<Counter>(x =>
+		{
+			//x.RawImage.texture.DestroyIfNotNull();
+		});
+		
 		//false to prevent destroying preset textures
-		Preview.texture.DestroyIfNotNull(false);
+		//Preview.texture.DestroyIfNotNull(false);
+		Resources.UnloadUnusedAssets();
 	}
 
 	private void RefreshKernelOutline()
@@ -73,8 +78,9 @@ public class ElementCounter : MonoBehaviour
 		if (KernelOutlineTexture != null && (KernelOutlineTexture.width != kernelSize + 2 ||
 		                                     KernelOutlineTexture.height != kernelSize + 2))
 		{
-			DestroyImmediate(KernelOutlineTexture, true);
+			//DestroyImmediate(KernelOutlineTexture, true);
 			KernelOutlineTexture = null;
+			Resources.UnloadUnusedAssets();
 		}
 
 		if (KernelOutlineTexture == null)

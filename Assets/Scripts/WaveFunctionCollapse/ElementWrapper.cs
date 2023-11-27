@@ -80,10 +80,10 @@ public class ElementWrapper : IEquatable<ElementWrapper>, IDisposable
 
     public void Dispose()
     {
-        if (Texture != null)
-        {
-            Object.DestroyImmediate(Texture, true);
+        // if (Texture != null)
+        // {
+            //Object.DestroyImmediate(Texture, true);
             Texture = null;
-        }
+        //}
     }
 }

@@ -2,10 +2,10 @@ using UnityEngine;
 
 public class Collapse : IOperation
 {
-    public Vector2 Position;
+    public Vector2Int Position;
     public Color? Color;
 
-    public Collapse(Vector2 position, Color? color = null)
+    public Collapse(Vector2Int position, Color? color = null)
     {
         Position = position;
         Color = color;
@@ -15,7 +15,7 @@ public class Collapse : IOperation
 
     public bool Execute()
     {
-        var outputPixel = WFC.Output[(int)Position.x, (int)Position.y];
+        var outputPixel = WFC.Output[Position.x, Position.y];
         if (Color != null)
         {
             return outputPixel.Collapse(Color.Value, true);
