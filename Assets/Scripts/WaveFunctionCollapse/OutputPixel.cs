@@ -66,12 +66,12 @@ public class OutputPixel : IDisposable
 	public bool Collapse(bool snapshot)
 	{
 		IsCollapsed = true;
-		Dictionary<ElementWrapper, int> elementsPossibilities = new();
+		Dictionary<int, int> elementsPossibilities = new();
 		int sum = 0;
 		for (int i = 0; i < PossibleElements.Count; i++)
 		{
-			var element = WFC.AllPossibleElements[PossibleElements[i]];
-			int elementWeight = WFC.Elements[element];
+			var element = PossibleElements[i];
+			int elementWeight = WFC.ElementsCounts[element];
 			sum += elementWeight;
 			elementsPossibilities.Add(element, elementWeight);
 		}
@@ -83,7 +83,7 @@ public class OutputPixel : IDisposable
 			random -= element.Value;
 			if (random < 0)
 			{
-				Color = element.Key.MiddleColor;
+				Color = WFC.AllPossibleElements[element.Key].MiddleColor;
 				break;
 			}
 		}

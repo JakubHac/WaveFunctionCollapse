@@ -17,10 +17,10 @@ public class WFC : MonoBehaviour
 	
 	bool PreservedGround = false;
 	public static WFCSetup Setup;
-	public static Dictionary<ElementWrapper, int> Elements;
+	public static int[] ElementsCounts;
 	public static OutputPixel[,] Output;
 	Texture2D OutputTexture;
-	public static Dictionary<int, List<ElementWrapper>> ColorsElements = new();
+	public static Dictionary<int, List<int>> ColorsElements = new();
 	public static ElementWrapper[] AllPossibleElements;
 	//private static readonly IReadOnlyList<ElementWrapper> EmptyElementWrappers = new ElementWrapper[0];
 	public static int AllElementsCount;
@@ -232,7 +232,8 @@ public class WFC : MonoBehaviour
 
 	private void SetupOutput(Dictionary<ElementWrapper, int> elements)
 	{
-		Elements = elements;
+		AllPossibleElements = elements.Keys.ToHashSet().ToArray();
+		ElementsCounts = Enumerable.Range(0, AllPossibleElements.Length).Select(x => elements[AllPossibleElements[x]]).ToArray();
 		if (Output != null)
 		{
 			ClearState(Output);
@@ -242,19 +243,20 @@ public class WFC : MonoBehaviour
 		Output = new OutputPixel[Setup.OutputWidth, Setup.OutputHeight];
 		AllElementsCount = elements.Count;
 		ColorsElements.Clear();
-		foreach (var element in Elements)
+		foreach (var element in Enumerable.Range(0, AllPossibleElements.Length))
 		{
-			if (ColorsElements.ContainsKey(element.Key.MiddleColor))
+			var color = AllPossibleElements[element].MiddleColor;
+			if (ColorsElements.ContainsKey(color))
 			{
-				ColorsElements[element.Key.MiddleColor].Add(element.Key);
+				ColorsElements[color].Add(element);
 			}
 			else
 			{
-				ColorsElements.Add(element.Key.MiddleColor, new List<ElementWrapper>(){element.Key});
+				ColorsElements.Add(color, new List<int>(){element});
 			}
 		}
 		
-		AllPossibleElements = Elements.Keys.ToHashSet().ToArray();
+		
 		
 		foreach (var element in AllPossibleElements)
 		{
