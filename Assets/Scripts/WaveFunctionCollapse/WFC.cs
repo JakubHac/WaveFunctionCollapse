@@ -330,14 +330,8 @@ public class WFC : MonoBehaviour
 					Debug.Log("Not taking a snapshot of a corrupted state");
 					return;
 				}
-				// if (ReferenceEquals(pixel.PossibleElements,AllPossibleElements))
-				// {
-				// 	copiedArray[i, j] = new OutputPixel(Output[i,j],  Enumerable.Range(0,EmptyElementWrappers.Count).ToArray());
-				// }
-				// else
-				// {
-					copiedArray[i, j] = new OutputPixel(Output[i,j]);
-				//}
+				
+				copiedArray[i, j] = new OutputPixel(Output[i,j]);
 			}
 		}
 		OutputHistory.Push(copiedArray);
@@ -434,19 +428,17 @@ public class WFC : MonoBehaviour
 	private static void RollbackOutputFromHistory()
 	{
 		var state = OutputHistory.Pop();
-		int rows = state.GetLength(0);
-		int cols = state.GetLength(1);
-		for (int x = 0; x < rows; x++)
-		{
-			for (int y = 0; y < cols; y++)
-			{
-				OutputPixel pixel = state[x, y];
-				// if (ReferenceEquals(pixel.PossibleElements, EmptyElementWrappers))
-				// {
-					pixel.PossibleElements = Enumerable.Range(0, AllPossibleElements.Length).ToArray();
-				//}
-			}
-		}
+		// int rows = state.GetLength(0);
+		// int cols = state.GetLength(1);
+		// for (int x = 0; x < rows; x++)
+		// {
+		// 	for (int y = 0; y < cols; y++)
+		// 	{
+		// 		OutputPixel pixel = state[x, y];
+		// 		
+		// 		pixel.PossibleElements = Enumerable.Range(0, AllPossibleElements.Length).ToArray();
+		// 	}
+		// }
 		Output = state;
 	}
 

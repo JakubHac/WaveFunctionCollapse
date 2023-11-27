@@ -8,7 +8,7 @@ public class ElementWrapper : IEquatable<ElementWrapper>, IDisposable
 {
     public Texture2D Texture { get; private set; }
     public readonly int MiddleColor;
-    private int? _hashCode;
+    private int _hashCode;
     private int[,] PixelsFromCenter;
     Vector2Int Center;
 
@@ -23,7 +23,7 @@ public class ElementWrapper : IEquatable<ElementWrapper>, IDisposable
             PixelsFromCenter[x, y] = ColorManager.AddColor(texture.GetPixel(x, y));
         }
         MiddleColor = PixelsFromCenter[Center.x, Center.y];
-        _hashCode = null;
+        _hashCode = CalcHashCode();
     }
 
     public bool Equals(ElementWrapper other)
@@ -69,7 +69,7 @@ public class ElementWrapper : IEquatable<ElementWrapper>, IDisposable
         return hashCode.ToHashCode();
     }
 
-    public override int GetHashCode() => _hashCode ??= CalcHashCode();
+    public override int GetHashCode() => _hashCode;
     
     public int GetPixelFromCenter(int xOffset, int yOffset)
     {

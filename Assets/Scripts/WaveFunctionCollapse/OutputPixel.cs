@@ -172,12 +172,10 @@ public class OutputPixel : IDisposable
 		return possibleColorsBefore != PossibleColors.Count;
 	}
 
-	private List<int> RefreshToBeAssigned = new List<int>();
-
 	private void Refresh()
 	{
 		var neighbors = WFC.GetNeighbors(Position);
-		RefreshToBeAssigned.Clear();
+		var refreshToBeAssigned = new List<int>();
 		foreach (var element in PossibleElements)
 		{
 			bool isPossible = true;
@@ -204,12 +202,12 @@ public class OutputPixel : IDisposable
 
 			if (isPossible)
 			{
-				RefreshToBeAssigned.Add(element);
+				refreshToBeAssigned.Add(element);
 			}
 		}
-		PossibleElements = RefreshToBeAssigned.ToArray();
-		RefreshToBeAssigned.Clear();
-		RefreshToBeAssigned.TrimExcess();
+		PossibleElements = refreshToBeAssigned.ToArray();
+		refreshToBeAssigned.Clear();
+		refreshToBeAssigned.TrimExcess();
 		PossibleColors.Clear();
 		foreach (var wrapperIndex in PossibleElements)
 		{
@@ -224,6 +222,5 @@ public class OutputPixel : IDisposable
 	public void Dispose()
 	{
 		PossibleElements = null;
-		RefreshToBeAssigned = null;
 	}
 }
