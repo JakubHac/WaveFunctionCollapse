@@ -276,6 +276,10 @@ public class WFC : MonoBehaviour
 
 	private static void ClearState(OutputPixel[,] historyState)
 	{
+		if (historyState == null)
+		{
+			return;
+		}
 		int rows = historyState.GetLength(0);
 		int cols = historyState.GetLength(1);
 		for (int x = 0; x < rows; x++)
