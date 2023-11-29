@@ -28,13 +28,13 @@ public class WFC : MonoBehaviour
 	static List<IOperation> Operations = new ();
 	
 	private static int backtracks = 1;
-	private const int maxBacktracks = 10;
+	private const int maxBacktracks = 30;
 	private static int successes = 0;
 	private const int successesToReduceBacktrack = 3;
 	
 	private static int historyCompact = 1;
-	private const int maxHistorySizeBeforeCompact = 50;
-	private const int historyCompactSize = 30;
+	private const int maxHistorySizeBeforeCompact = 200;
+	private const int historyCompactSize = 125;
 	private static int historySizeWithoutCompact => OutputHistory?.Count - historyCompact ?? 0;
 	private static bool shouldCompactHistory => historySizeWithoutCompact > maxHistorySizeBeforeCompact;
 
@@ -255,8 +255,6 @@ public class WFC : MonoBehaviour
 				ColorsElements.Add(color, new List<int>(){element});
 			}
 		}
-		
-		
 		
 		foreach (var element in AllPossibleElements)
 		{
