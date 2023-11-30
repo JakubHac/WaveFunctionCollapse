@@ -89,7 +89,7 @@ public class WFC : MonoBehaviour
 		{
 			camera.ResetCameraPosition();
 		}
-		//Random.InitState(1234567890);
+		Random.InitState(Setup.Seed ?? new System.Random().Next());
 		PreservedGround = false;
 		AutoCollapseButton.Disable();
 		SetupOutput(elements);

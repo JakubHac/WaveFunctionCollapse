@@ -1,6 +1,5 @@
 using System;
 using System.Threading.Tasks;
-using Unity.Collections;
 using UnityEngine;
 
 public class OutputMeshController : MonoBehaviour
@@ -36,24 +35,8 @@ public class OutputMeshController : MonoBehaviour
     
     private static int HeightMapID = Shader.PropertyToID("HeightMap");
 
-    [SerializeField] private Texture2D TestTexture;
-
     private ComputeBuffer buffer = null;
     private int count;
-
-    // private void TestWithSin()
-    // {
-    //     int vertexCount = PrepareBuffer();
-    //     
-    //     Array array = new float[Filter.sharedMesh.vertexCount];
-    //     for (int i = 0; i < vertexCount; i++)
-    //     {
-    //         array.SetValue(Mathf.Sin(i + Time.realtimeSinceStartup),i);
-    //     }
-    //     
-    //     SetBufferData(array);
-    //     //buffer.Dispose();
-    // }
 
     private void SetBufferData(Array array)
     {

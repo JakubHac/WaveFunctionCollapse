@@ -9,8 +9,8 @@ public class PresetSO : ScriptableObject
     public bool Ground = true;
     public bool Rotate = true;
     public Texture2D InputTexture;
-    public EmptyBehaviour EmptyBehaviour = EmptyBehaviour.EmptyMatchOutside;
-
+    public string Seed = "";
+    
     public WFCSetup GetSetup()
     {
         return new WFCSetup()
@@ -21,7 +21,7 @@ public class PresetSO : ScriptableObject
             Ground = Ground,
             Rotate = Rotate,
             InputTexture = InputTexture,
-            EmptyBehaviour = EmptyBehaviour
+            Seed = Seed.ToSeed()
         };
     }
 }

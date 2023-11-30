@@ -7,6 +7,6 @@ public class WFCSetup
     public int OutputHeight = 64;
     public bool Ground = true;
     public bool Rotate = true;
-    public EmptyBehaviour EmptyBehaviour;
     public Texture2D InputTexture;
+    public int? Seed = null;
 }

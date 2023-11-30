@@ -18,12 +18,19 @@ public class OutputPixel : IDisposable
 		Color = other.Color;
 		if (possibleElementsOverride == null)
 		{
-			var clone = new int[other.PossibleElements.Count];
-			for (int i = 0; i < other.PossibleElements.Count; i++)
+			if (other.PossibleElements == null || other.PossibleElements.Count == 0)
 			{
-				clone[i] = other.PossibleElements[i];
+				PossibleElements = Array.Empty<int>();
 			}
-			PossibleElements = clone;
+			else
+			{
+				var clone = new int[other.PossibleElements.Count];
+				for (int i = 0; i < other.PossibleElements.Count; i++)
+				{
+					clone[i] = other.PossibleElements[i];
+				}
+				PossibleElements = clone;
+			}
 		}
 		else
 		{
