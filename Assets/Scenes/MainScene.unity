@@ -1913,7 +1913,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Dyplomant: Jakub Hac<space=5e>Promotor: \u0141ukasz Roszkowiak"
+  m_text: "Dyplomant: Jakub Hac<space=5e>Promotor:  dr in\u017C. \u0141ukasz Roszkowiak"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -5326,7 +5326,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Dyplomant: Jakub Hac<space=5e>Promotor: \u0141ukasz Roszkowiak"
+  m_text: "Dyplomant: Jakub Hac<space=5e>Promotor:  dr in\u017C. \u0141ukasz Roszkowiak"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -6117,7 +6117,6 @@ MonoBehaviour:
   Filter: {fileID: 654943940}
   MaxDistanceFromCenter: 8
   MaxHeight: 3
-  TestTexture: {fileID: 0}
 --- !u!23 &654943939
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -6225,7 +6224,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Dyplomant: Jakub Hac<space=5e>Promotor: \u0141ukasz Roszkowiak"
+  m_text: "Dyplomant: Jakub Hac<space=5e>Promotor:  dr in\u017C. \u0141ukasz Roszkowiak"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -11595,7 +11594,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1361905708
 RectTransform:
   m_ObjectHideFlags: 0
@@ -11611,9 +11610,9 @@ RectTransform:
   - {fileID: 1309418715}
   m_Father: {fileID: 1727141229}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 1080, y: -35}
   m_SizeDelta: {x: 320, y: 60}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1361905709
@@ -13316,7 +13315,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Dyplomant: Jakub Hac<space=5e>Promotor: \u0141ukasz Roszkowiak"
+  m_text: "Dyplomant: Jakub Hac<space=5e>Promotor:  dr in\u017C. \u0141ukasz Roszkowiak"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -14875,7 +14874,6 @@ GameObject:
   - component: {fileID: 1754626384}
   - component: {fileID: 1754626383}
   - component: {fileID: 1754626382}
-  - component: {fileID: 1754626381}
   m_Layer: 5
   m_Name: Save
   m_TagString: Untagged
@@ -14903,18 +14901,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 240, y: 60}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1754626381
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1754626379}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 43504bdea0b83c345bbc650ea6d3088a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &1754626382
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14958,7 +14944,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1260930608}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 72787503}
+        m_TargetAssemblyTypeName: WFC, Assembly-CSharp
+        m_MethodName: Save
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1754626383
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -16171,6 +16169,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Preset: {fileID: 11400000, guid: e8818d07e9b767844ae407145de0d5b5, type: 2}
+  Width: {fileID: 1762687603}
+  Height: {fileID: 615157248}
+  Seed: {fileID: 390552225}
+  Kernel: {fileID: 520074268}
+  Rotate: {fileID: 1892602537}
+  PreserveGround: {fileID: 1717312269}
+  Preview: {fileID: 1697331604}
+  PresetView: {fileID: 374394382}
+  CustomView: {fileID: 584125719}
 --- !u!1 &1885543966
 GameObject:
   m_ObjectHideFlags: 0
@@ -16228,7 +16235,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Dyplomant: Jakub Hac<space=5e>Promotor: \u0141ukasz Roszkowiak"
+  m_text: "Dyplomant: Jakub Hac<space=5e>Promotor:  dr in\u017C. \u0141ukasz Roszkowiak"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -17883,6 +17890,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Preset: {fileID: 11400000, guid: 82d828f7825698f45817b97e32c1a030, type: 2}
+  Width: {fileID: 1762687603}
+  Height: {fileID: 615157248}
+  Seed: {fileID: 390552225}
+  Kernel: {fileID: 520074268}
+  Rotate: {fileID: 1892602537}
+  PreserveGround: {fileID: 1717312269}
+  Preview: {fileID: 1697331604}
+  PresetView: {fileID: 374394382}
+  CustomView: {fileID: 584125719}
 --- !u!1 &2081584278
 GameObject:
   m_ObjectHideFlags: 0

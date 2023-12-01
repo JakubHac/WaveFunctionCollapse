@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: WFC Preset Flowers
   m_EditorClassIdentifier: 
   KernelSize: 5
-  OutputWidth: 64
-  OutputHeight: 64
+  OutputWidth: 32
+  OutputHeight: 32
   Ground: 1
   Rotate: 0
   InputTexture: {fileID: 2800000, guid: 33c1644d307b848478426e5dbd0ce7ea, type: 3}
-  EmptyBehaviour: 0
+  Seed: Jakub Hac

@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Windows.Forms;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -455,5 +457,33 @@ public class WFC : MonoBehaviour
 			Operations.Add(propagation);
 		}
 		PreservedGround = true;
+	}
+
+	public void Save()
+	{
+		if (OutputTexture == null)
+		{
+			MessageBox.Show("Wyjściowa tekstura jest pusta", "Błąd zapisu", MessageBoxButtons.OK, MessageBoxIcon.Error);
+			return;
+		}
+		
+		var dialog = new SaveFileDialog
+		{
+			FileName = "texture", 
+			DefaultExt = ".png",
+			Filter = "PNG files (*.png)|*.png" 
+		};
+
+		if (dialog.ShowDialog() == DialogResult.OK)
+		{
+			var pngData = OutputTexture.CopyTexture2DWithOpaqueAlpha().EncodeToPNG();
+			if (pngData != null)
+				File.WriteAllBytes(dialog.FileName, pngData);
+			else
+				Debug.LogError("Error encoding texture to PNG");
+		}
+
+		Resources.UnloadUnusedAssets();
+		GC.Collect(2, GCCollectionMode.Forced, true, true);
 	}
 }

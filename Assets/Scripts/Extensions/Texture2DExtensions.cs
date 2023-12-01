@@ -31,4 +31,30 @@ public static class Texture2DExtensions
         };
     }
     
+    
+    public static Texture2D CopyTexture2DWithOpaqueAlpha(this Texture2D srcTexture)
+    {
+        int width = srcTexture.width;
+        int height = srcTexture.height;
+
+        Texture2D destTexture = new Texture2D(width, height, srcTexture.format, false)
+        {
+            filterMode = srcTexture.filterMode,
+            wrapMode = srcTexture.wrapMode
+        };
+        
+        Color[] srcPixels = srcTexture.GetPixels();
+        Color[] destPixels = new Color[srcPixels.Length];
+
+        for (int i = 0; i < srcPixels.Length; i++)
+        {
+            Color srcPixel = srcPixels[i];
+            destPixels[i] = new Color(srcPixel.r, srcPixel.g, srcPixel.b, 1f);
+        }
+        
+        destTexture.SetPixels(destPixels);
+        destTexture.Apply();
+
+        return destTexture;
+    }
 }
