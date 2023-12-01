@@ -28,6 +28,8 @@ public class PresetButton : MonoBehaviour
 		Kernel.text = Preset.KernelSize.ToString();
 		Rotate.isOn = Preset.Rotate;
 		PreserveGround.isOn = Preset.Ground;
+		PreserveGround.interactable = Preset.GroundInteractable;
+		Rotate.interactable = Preset.RotateInteractable;
 		Preview.texture = Preset.InputTexture;
 		Preview.FitInParent();
 		

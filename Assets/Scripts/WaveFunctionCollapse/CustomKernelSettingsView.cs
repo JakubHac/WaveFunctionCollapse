@@ -54,6 +54,8 @@ public class CustomKernelSettingsView : MonoBehaviour
 			OutputHeight.text = "";
 			Seed.text = "";
 			KernelSize.text = "3";
+			AllowRotation.interactable = true;
+			PreserveGround.interactable = true;
 			AllowRotation.isOn = true;
 			PreserveGround.isOn = false;
 		}

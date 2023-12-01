@@ -18,4 +18,6 @@ MonoBehaviour:
   Ground: 1
   Rotate: 0
   InputTexture: {fileID: 2800000, guid: 33c1644d307b848478426e5dbd0ce7ea, type: 3}
-  Seed: Jakub Hac
+  Seed: 20232024
+  GroundInteractable: 0
+  RotateInteractable: 0

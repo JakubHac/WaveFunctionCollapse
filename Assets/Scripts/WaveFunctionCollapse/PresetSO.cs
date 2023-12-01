@@ -10,6 +10,8 @@ public class PresetSO : ScriptableObject
     public bool Rotate = true;
     public Texture2D InputTexture;
     public string Seed = "";
+    public bool GroundInteractable = true;
+    public bool RotateInteractable = true;
     
     public WFCSetup GetSetup()
     {

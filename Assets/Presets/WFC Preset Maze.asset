@@ -19,3 +19,5 @@ MonoBehaviour:
   Rotate: 1
   InputTexture: {fileID: 2800000, guid: bb4786914a9736944b37106eba2473c7, type: 3}
   Seed: 19755
+  GroundInteractable: 0
+  RotateInteractable: 1
