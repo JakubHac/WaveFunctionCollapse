@@ -84,6 +84,8 @@ public class WFC : MonoBehaviour
 		counter.Setup(Setup);
 	}
 
+	private float? startTime = null;
+
 	public void StartAlogrithm(Dictionary<ElementWrapper, int> elements)
 	{
 		var camera = FindObjectOfType<OrbitCameraController>();
@@ -104,6 +106,11 @@ public class WFC : MonoBehaviour
 	public void NextStep()
 	{
 		Debug.Log($"Next step, R: {Random.state.GetHashCode()}");
+		if (startTime == null)
+		{
+			startTime = Time.realtimeSinceStartup;
+		}
+		
 		if (!PreservedGround && Setup.Ground)
 		{
 			PreserveGround();
@@ -193,6 +200,8 @@ public class WFC : MonoBehaviour
 		AllPossibleElements = null;
 		ClearState(Output);
 		ClearHistory();
+		Debug.Log($"Total time: {Time.realtimeSinceStartup - startTime}");
+		startTime = null;
 	}
 
 	private void RefreshOutputTexture()

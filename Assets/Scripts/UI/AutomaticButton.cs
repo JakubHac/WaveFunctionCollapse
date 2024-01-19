@@ -1,12 +1,14 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class AutomaticButton : MonoBehaviour
 {
     private Coroutine AutomaticRoutine;
     private bool AutomaticEnabled = false;
+    public bool EnableDelay = true;
     public float AutomaticDelay = 0.5f;
 
     public Button Button;
@@ -48,7 +50,14 @@ public class AutomaticButton : MonoBehaviour
     private IEnumerator AutomaticClick()
     {
         OnClick?.Invoke();
-        yield return new WaitForSecondsRealtime(AutomaticDelay);
+        if (!EnableDelay)
+        {
+            yield return new WaitForSecondsRealtime(AutomaticDelay);
+        }
+        else
+        {
+            yield return new WaitForEndOfFrame();
+        }
         if (AutomaticEnabled)
         {
             AutomaticRoutine = StartCoroutine(AutomaticClick());
