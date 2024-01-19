@@ -11,6 +11,10 @@ jobs:
     name: Build my project ✨
     runs-on: self-hosted
     steps:
+      # Clean
+      - name: Clean Workspace
+        uses: AutoModality/action-clean@v1.1.0
+        
       # Checkout
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -18,12 +22,12 @@ jobs:
           lfs: true
 
       # Cache
-      - uses: actions/cache@v3
-        with:
-          path: Library
-          key: Library-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
-          restore-keys: |
-            Library-
+#      - uses: actions/cache@v3
+#        with:
+#          path: Library
+#          key: Library-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+#          restore-keys: |
+#            Library-
 
       # Test
 #      - name: Run tests
