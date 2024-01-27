@@ -11,7 +11,7 @@ jobs:
     name: Build windows artifact
     runs-on: self-hosted
     container:
-      image: docksal/empty
+      image: ubuntu
       options: --user root
     steps:
 #      # change working directory owner before clean
