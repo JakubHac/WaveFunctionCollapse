@@ -11,6 +11,10 @@ jobs:
     name: Build windows artifact
     runs-on: self-hosted
     steps:
+      # change working directory owner before clean
+      - name: Set owner of working dir recurively (Linux)
+        run: sudo chown -R $(whoami) .
+        
       # Clean
       - name: Clean Workspace
         uses: AutoModality/action-clean@v1.1.0
@@ -66,8 +70,6 @@ jobs:
         with:
           targetPlatform: StandaloneWindows64
           allowDirtyBuild: true
-        
-      
 
       # Output
       - uses: actions/upload-artifact@v4
@@ -77,7 +79,7 @@ jobs:
           compression-level: 9 # maximum compression
           retention-days: 7 # delete after 7 days
             
-      # Clean up
-      - name: Clean Up after failed build # if we don't do this, the next build will fail
-        if: always()
-        uses: AutoModality/action-clean@v1.1.0
+#      # Clean up
+#      - name: Clean Up after failed build # if we don't do this, the next build will fail
+#        if: always()
+#        uses: AutoModality/action-clean@v1.1.0
