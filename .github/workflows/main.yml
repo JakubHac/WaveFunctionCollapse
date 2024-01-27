@@ -1,4 +1,4 @@
-﻿name: Build and upload artifact
+﻿name: WFC Build and upload artifact
 
 on: 
   push: 
@@ -10,11 +10,7 @@ jobs:
   build:
     name: Build windows artifact
     runs-on: self-hosted
-    steps:
-#      # change working directory owner before clean
-#      - name: Set owner of working dir recurively (Linux)
-#        run: sudo chown -R $(whoami) .
-        
+    steps:        
       # Clean
       - name: Clean Workspace
         uses: AutoModality/action-clean@v1.1.0
@@ -70,6 +66,7 @@ jobs:
         with:
           targetPlatform: StandaloneWindows64
           allowDirtyBuild: true
+          chownFilesTo: "1000:1000"
 
       # Output
       - uses: actions/upload-artifact@v4
