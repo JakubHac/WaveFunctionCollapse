@@ -24,6 +24,7 @@ jobs:
       # Get build version
       - name: Check for duplicate artifact
         run: |
+          cd $GITHUB_WORKSPACE
           echo -n "buildVersion=" ; grep -m 1 "bundleVersion: " ProjectSettings/ProjectSettings.asset | cut -c 18- >> $GITHUB_ENV
 
       # Check for duplicate version
@@ -36,6 +37,7 @@ jobs:
       - name: Fail if Build-${{ env.buildVersion }} already exists
         run: exit 1
         if: "${{ steps.check_workflow_exists.outputs.exists == 'true' }}"
+        
       # Cache
 #      - uses: actions/cache@v3
 #        with:
