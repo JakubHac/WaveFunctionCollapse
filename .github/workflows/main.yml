@@ -29,7 +29,7 @@ jobs:
       - name: Check for duplicate artifact
         run: |
           cd $GITHUB_WORKSPACE
-          echo -n "buildVersion=" ; grep -m 1 "bundleVersion: " ProjectSettings/ProjectSettings.asset | cut -c 18- >> $GITHUB_ENV
+          (echo -n "buildVersion=" ; grep -m 1 "bundleVersion: " ProjectSettings/ProjectSettings.asset | cut -c 18- ) >> $GITHUB_ENV
 
       # Check for duplicate version
       - name: Check artifact exists
