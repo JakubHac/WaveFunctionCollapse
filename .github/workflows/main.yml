@@ -10,10 +10,13 @@ jobs:
   build:
     name: Build windows artifact
     runs-on: self-hosted
+    container:
+      image: scratch
+      options: --user 1000
     steps:
-      # change working directory owner before clean
-      - name: Set owner of working dir recurively (Linux)
-        run: sudo chown -R $(whoami) .
+#      # change working directory owner before clean
+#      - name: Set owner of working dir recurively (Linux)
+#        run: sudo chown -R $(whoami) .
         
       # Clean
       - name: Clean Workspace
