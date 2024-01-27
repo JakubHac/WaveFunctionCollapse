@@ -12,7 +12,7 @@ jobs:
     runs-on: self-hosted
     container:
       image: docksal/empty
-      options: --user 1000
+      options: --user root
     steps:
 #      # change working directory owner before clean
 #      - name: Set owner of working dir recurively (Linux)
