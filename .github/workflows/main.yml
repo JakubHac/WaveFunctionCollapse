@@ -11,9 +11,9 @@ jobs:
     name: Build windows artifact
     runs-on: self-hosted
     steps:        
-      # Clean
-      - name: Clean Workspace
-        uses: AutoModality/action-clean@v1.1.0
+#      # Clean
+#      - name: Clean Workspace
+#        uses: AutoModality/action-clean@v1.1.0
         
       # Checkout
       - name: Checkout repository
@@ -21,11 +21,11 @@ jobs:
         with:
           lfs: true
       
-#      # Get build version
-#      - name: Check for duplicate artifact
-#        run: |
-#          cd $GITHUB_WORKSPACE
-#          (echo -n "buildVersion=" ; grep -m 1 "bundleVersion: " ProjectSettings/ProjectSettings.asset | cut -c 18- ) >> $GITHUB_ENV
+      # Get build version
+      - name: Get build version
+        run: |
+          cd $GITHUB_WORKSPACE
+          (echo -n "buildVersion=" ; grep -m 1 "bundleVersion: " ProjectSettings/ProjectSettings.asset | cut -c 18- ) >> $GITHUB_ENV
 #
 #      # Check for duplicate version
 #      - name: Check artifact exists
@@ -76,7 +76,7 @@ jobs:
           compression-level: 9 # maximum compression
           retention-days: 7 # delete after 7 days
             
-      # Clean up
-      - name: Clean Up after failed build # if we don't do this, the next build will fail
-        if: always()
-        uses: AutoModality/action-clean@v1.1.0
+#      # Clean up
+#      - name: Clean Up after failed build # if we don't do this, the next build will fail
+#        if: always()
+#        uses: AutoModality/action-clean@v1.1.0
