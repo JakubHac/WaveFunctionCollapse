@@ -11,7 +11,7 @@ jobs:
     name: Build windows artifact
     runs-on: self-hosted
     container:
-      image: scratch
+      image: docksal/empty
       options: --user 1000
     steps:
 #      # change working directory owner before clean
