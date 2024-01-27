@@ -9,24 +9,20 @@ on:
 jobs:
   build:
     name: Build windows artifact
-    runs-on: self-hosted
-    steps:        
-#      # Clean
-#      - name: Clean Workspace
-#        uses: AutoModality/action-clean@v1.1.0
-        
+    runs-on: ubuntu-latest
+    steps:           
       # Checkout
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           lfs: true
       
-      # Get build version
-      - name: Get build version
-        run: |
-          cd $GITHUB_WORKSPACE
-          (echo -n "buildVersion=" ; grep -m 1 "bundleVersion: " ProjectSettings/ProjectSettings.asset | cut -c 18- ) >> $GITHUB_ENV
-#
+#      # Get build version
+#      - name: Get build version
+#        run: |
+#          cd $GITHUB_WORKSPACE
+#          (echo -n "buildVersion=" ; grep -m 1 "bundleVersion: " ProjectSettings/ProjectSettings.asset | cut -c 18- ) >> $GITHUB_ENV
+
 #      # Check for duplicate version
 #      - name: Check artifact exists
 #        uses: xSAVIKx/artifact-exists-action@v0
@@ -38,7 +34,7 @@ jobs:
 #        run: exit 1
 #        if: "${{ steps.check_workflow_exists.outputs.exists == 'true' }}"
         
-      # Cache
+     # Cache
 #      - uses: actions/cache@v3
 #        with:
 #          path: Library
@@ -58,6 +54,7 @@ jobs:
 
       # Build windows
       - name: Build project
+        id: myBuildStep
         uses: game-ci/unity-builder@v4
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
@@ -66,16 +63,15 @@ jobs:
         with:
           targetPlatform: StandaloneWindows64
           allowDirtyBuild: true
-          #chownFilesTo: "1000:1000"
-          runAsHostUser: true
-
+          versioning: Semantic
+          
       # Output
       - uses: actions/upload-artifact@v4
         with:
-          name: Build-${{ env.buildVersion }}
+          name: Windows-${{ steps.myBuildStep.outputs.buildVersion  }}
           path: build
           compression-level: 9 # maximum compression
-          retention-days: 7 # delete after 7 days
+          retention-days: 3
             
 #      # Clean up
 #      - name: Clean Up after failed build # if we don't do this, the next build will fail
