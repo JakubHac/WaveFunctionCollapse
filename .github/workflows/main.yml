@@ -25,22 +25,22 @@ jobs:
         with:
           lfs: true
       
-      # Get build version
-      - name: Check for duplicate artifact
-        run: |
-          cd $GITHUB_WORKSPACE
-          (echo -n "buildVersion=" ; grep -m 1 "bundleVersion: " ProjectSettings/ProjectSettings.asset | cut -c 18- ) >> $GITHUB_ENV
-
-      # Check for duplicate version
-      - name: Check artifact exists
-        uses: xSAVIKx/artifact-exists-action@v0
-        id: "artifact-exists"
-        with:
-          name: "Build-${{ env.buildVersion }}"
-      # Fail if artifact exists
-      - name: Fail if Build-${{ env.buildVersion }} already exists
-        run: exit 1
-        if: "${{ steps.check_workflow_exists.outputs.exists == 'true' }}"
+#      # Get build version
+#      - name: Check for duplicate artifact
+#        run: |
+#          cd $GITHUB_WORKSPACE
+#          (echo -n "buildVersion=" ; grep -m 1 "bundleVersion: " ProjectSettings/ProjectSettings.asset | cut -c 18- ) >> $GITHUB_ENV
+#
+#      # Check for duplicate version
+#      - name: Check artifact exists
+#        uses: xSAVIKx/artifact-exists-action@v0
+#        id: "artifact-exists"
+#        with:
+#          name: "Build-${{ env.buildVersion }}"
+#      # Fail if artifact exists
+#      - name: Fail if Build-${{ env.buildVersion }} already exists
+#        run: exit 1
+#        if: "${{ steps.check_workflow_exists.outputs.exists == 'true' }}"
         
       # Cache
 #      - uses: actions/cache@v3
@@ -79,7 +79,7 @@ jobs:
           compression-level: 9 # maximum compression
           retention-days: 7 # delete after 7 days
             
-#      # Clean up
-#      - name: Clean Up after failed build # if we don't do this, the next build will fail
-#        if: always()
-#        uses: AutoModality/action-clean@v1.1.0
+      # Clean up
+      - name: Clean Up after failed build # if we don't do this, the next build will fail
+        if: always()
+        uses: AutoModality/action-clean@v1.1.0
