@@ -67,10 +67,7 @@ jobs:
           targetPlatform: StandaloneWindows64
           allowDirtyBuild: true
         
-      # Clean on failure
-      - name: Clean Up after failed build # if we don't do this, the next build will fail
-        if: failure()
-        uses: AutoModality/action-clean@v1.1.0
+      
 
       # Output
       - uses: actions/upload-artifact@v4
@@ -79,3 +76,8 @@ jobs:
           path: build
           compression-level: 9 # maximum compression
           retention-days: 7 # delete after 7 days
+            
+      # Clean up
+      - name: Clean Up after failed build # if we don't do this, the next build will fail
+        if: always()
+        uses: AutoModality/action-clean@v1.1.0
